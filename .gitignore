@@ -107,7 +107,7 @@ ENV/
 env.bak/
 venv.bak/
 .DeckBuilderEnv-01/
-
+.DeckBuilderEnv-01
 
 # Spyder project settings
 .spyderproject
