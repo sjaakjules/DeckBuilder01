@@ -94,7 +94,7 @@ class DeckBuilder:
         
         # Load data
         self.load_card_data()
-        self.load_collection("assets/collection-2025-07-07T01_38_01.445Z.csv", force_update=True)
+        self.load_collection("assets/collection-2025-07-07T01_38_01.445Z.csv", force_update=False)
         
     def load_collection(self, path: str, force_update: bool = False):
         """Load collection from CSV file with JSON caching"""
