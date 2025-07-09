@@ -1,0 +1,952 @@
+name,type,rarity,category,rulesText,cost,attack,defense,life,air,earth,fire,water,element_count
+Apprentice Wizard,Minion,Ordinary,0,"Spellcaster
+
+Genesis → Draw a spell.",3.0,1.0,0,0.0,0,0,0,0,0
+Blood Ravens,Minion,Ordinary,0,"Airborne
+ 
+Damage dealt by Blood Ravens' strikes heals you.",1.0,1.0,0,0.0,0,0,0,0,0
+Candlemas Monks,Minion,Elite,0,Deathrite → Proceed to the end phase.,3.0,2.0,0,0.0,0,0,0,0,0
+Cloud Spirit,Minion,Ordinary,0,"Airborne, Movement +2",2.0,2.0,0,0.0,0,0,0,0,0
+Daperyll Vampire,Minion,Exceptional,0,"Airborne
+
+Damage dealt by Daperyll Vampire's strikes heals you.",5.0,4.0,0,0.0,0,0,0,0,0
+Dead of Night Demon,Minion,Ordinary,0,Stealth,2.0,2.0,0,0.0,0,0,0,0,0
+East-West Dragon,Minion,Elite,0,"Airborne
+
+Moves freely sideways.",5.0,4.0,0,0.0,0,0,0,0,0
+Grandmaster Wizard,Minion,Elite,0,"Spellcaster
+
+Genesis → Draw three spells.",6.0,0.0,0,0.0,0,0,0,0,0
+Grim Reaper,Minion,Unique,0,"Lethal
+
+Whenever Grim Reaper kills a minion, banish that minion and all copies. Search its owner's cemetery, hand, and spellbook and banish any copies. They shuffle.",2.0,1.0,0,0.0,0,0,0,0,0
+Gyre Hippogriffs,Minion,Exceptional,0,"Airborne, Charge",4.0,3.0,0,0.0,0,0,0,0,0
+Haast Eagle,Minion,Exceptional,0,"Airborne
+
+May carry a weaker allied minion.",3.0,3.0,0,0.0,0,0,0,0,0
+Headless Haunt,Minion,Exceptional,0,"Voidwalk
+
+At the start of your turn, Headless Haunt teleports to the top of a random site or void.",3.0,4.0,0,0.0,0,0,0,0,0
+Highland Clansmen,Minion,Ordinary,0,Charge,7.0,5.0,0,0.0,0,0,0,0,0
+Highland Falconer,Minion,Elite,0,Genesis → You may search your hand and spellbook for a Beast with Airborne and mana cost ② or less and summon it here. Shuffle if needed.,2.0,1.0,0,0.0,0,0,0,0,0
+Highland Princess,Minion,Unique,0,"Genesis → Search your spellbook for an artifact that costs ① or less, reveal it, and put it into your hand. Shuffle.",2.0,1.0,0,0.0,0,0,0,0,0
+Hounds of Ondaros,Minion,Elite,0,"Airborne, Burrowing, Submerge, Voidwalk
+ 
+Nearby enemies permanently lose Stealth.",5.0,4.0,0,0.0,0,0,0,0,0
+Kite Archer,Minion,Exceptional,0,"Ranged
+
+Immediately after performing a ranged strike, Kite Archer may take a step.",3.0,2.0,0,0.0,0,0,0,0,0
+Lord of the Void,Minion,Unique,0,"Voidwalk
+
+At the end of your turn, Lord of the Void may banish an adjacent site, unless there's an Avatar there.",9.0,0.0,0,0.0,0,0,0,0,0
+Men of Leng,Minion,Ordinary,0,"Whenever Men of Leng strike an Avatar, that Avatar discards a random card.",2.0,2.0,0,0.0,0,0,0,0,0
+Midnight Rogue,Minion,Ordinary,0,"Ranged, Stealth",3.0,2.0,0,0.0,0,0,0,0,0
+Moon Clan Werewolf,Minion,Exceptional,0,Sacrifice an allied Mortal → Summon Moon Clan Werewolf from your hand to the Mortal's location.,3.0,3.0,0,0.0,0,0,0,0,0
+Nightmare,Minion,Elite,0,"At the end of your turn, for each enemy minion here, you may push it to an adjacent location or void.",7.0,6.0,0,0.0,0,0,0,0,0
+Nimbus Jinn,Minion,Elite,0,"Airborne
+
+Discard a spell → Deal 3 damage to another random unit here.",6.0,4.0,0,0.0,0,0,0,0,0
+Palliburrie Bats,Minion,Ordinary,0,"Airborne, Burrowing",2.0,2.0,0,0.0,0,0,0,0,0
+Peregrine Apparition,Minion,Exceptional,0,"Airborne, Movement +3, Voidwalk",3.0,1.0,0,0.0,0,0,0,0,0
+Phantasmal Shade,Minion,Exceptional,0,"When Phantasmal Shade is struck, destroy it.",3.0,4.0,0,0.0,0,0,0,0,0
+Phantom Steed,Minion,Exceptional,0,"Movement +2, Voidwalk
+
+May carry an allied minion.",3.0,2.0,0,0.0,0,0,0,0,0
+Phase Assassin,Minion,Exceptional,0,"Voidwalk
+
+Whenever Phase Assassin enters the void, he gains Stealth.",3.0,3.0,0,0.0,0,0,0,0,0
+Plumed Pegasus,Minion,Ordinary,0,Airborne,3.0,3.0,0,0.0,0,0,0,0,0
+Puppet Master,Minion,Elite,0,"Airborne
+
+Genesis → Gain control of all tapped minions here until Puppet Master leaves the realm.",6.0,1.0,0,0.0,0,0,0,0,0
+Recurring Specter,Minion,Elite,0,"Can't defend.
+
+May be cast from your cemetery.",2.0,1.0,0,0.0,0,0,0,0,0
+Riddle Sphinx,Minion,Elite,0,"Airborne
+
+Genesis → Look at your topmost spell. You may put it on the bottom of your spellbook, then an opponent may exchange your top and bottommost spells. Draw a card.",6.0,4.0,0,0.0,0,0,0,0,0
+Roaming Monster,Minion,Ordinary,0,May be summoned to any site.,5.0,4.0,0,0.0,0,0,0,0,0
+Skirmishers of Mu,Minion,Exceptional,0,"Ranged
+
+During basic movement, Skirmishers of Mu may perform a ranged strike from any location along their path.",4.0,3.0,0,0.0,0,0,0,0,0
+Sky Baron,Minion,Elite,0,"Airborne
+
+All other minions lose Airborne.",6.0,6.0,0,0.0,0,0,0,0,0
+Sling Pixies,Minion,Exceptional,0,"Airborne, Ranged
+
+Takes no damage from units with 4 or more power.",1.0,1.0,0,0.0,0,0,0,0,0
+Snow Leopard,Minion,Ordinary,0,,1.0,2.0,0,0.0,0,0,0,0,0
+Spectral Stalker,Minion,Ordinary,0,Voidwalk,2.0,2.0,0,0.0,0,0,0,0,0
+Spire Lich,Minion,Exceptional,0,"If Spire Lich is atop a Tower, it has +2 power, Ranged, and Spellcaster.",3.0,1.0,0,0.0,0,0,0,0,0
+Ultimate Horror,Minion,Unique,0,"Airborne, Voidwalk
+
+Genesis → Summon each other dead Voidwalk minion to a nearby site or void.",8.0,6.0,0,0.0,0,0,0,0,0
+Vril Revenant,Minion,Elite,0,"Voidwalk
+
+① → Gain +1 power this turn.",2.0,1.0,0,0.0,0,0,0,0,0
+Wind Sylph,Minion,Exceptional,0,"Airborne, Air Spellcaster
+
+After Wind Sylph casts a Magic spell, she may push a unit here one step.",2.0,1.0,0,0.0,0,0,0,0,0
+Witherwing Hero,Minion,Unique,0,"Airborne
+
+Whenever a weaker allied minion here is attacked, you may return it to its owner's hand.",4.0,4.0,0,0.0,0,0,0,0,0
+Zephyranne Airship,Minion,Elite,0,"Airborne, Movement +2
+
+May carry any number of allied minions.",4.0,3.0,0,0.0,0,0,0,0,0
+Blink,Magic,Ordinary,0,An ally teleports to a location it’s nearby. Draw a card.,2.0,0.0,0,0.0,0,0,0,0,0
+Browse,Magic,Unique,0,Look at your next seven spells. Put one in your hand and the rest on the bottom of your spellbook in any order.,1.0,0.0,0,0.0,0,0,0,0,0
+Chain Lightning,Magic,Exceptional,0,"Deal 2 damage to target unit nearby. Any number of times, you may spend ② to additionally target a new unit nearby the previous one.",2.0,0.0,0,0.0,0,0,0,0,0
+Chaos Twister,Magic,Elite,0,"Place target minion on the back of your hand, then blow it off from a height of at least one foot. Deal damage equal to its power to each unit atop the site it lands on, including itself.",4.0,0.0,0,0.0,0,0,0,0,0
+Disenchant,Magic,Ordinary,0,Destroy all auras and artifacts at target location up to two steps away.,2.0,0.0,0,0.0,0,0,0,0,0
+Dream-Quest,Magic,Unique,0,"An allied Spellcaster falls asleep and is disabled until hurt. At the start of your next turn, if it's still asleep, you may wake it up to search your spellbook for a card and put it into your hand. Shuffle if needed.",1.0,0.0,0,0.0,0,0,0,0,0
+Fade,Magic,Ordinary,0,"Give an allied minion Stealth. If it occupies an enemy site, draw a card.",2.0,0.0,0,0.0,0,0,0,0,0
+Flanking Maneuver,Magic,Exceptional,0,Teleport any number of allies at one location to another location a chess knight's move away. Draw a card.,3.0,0.0,0,0.0,0,0,0,0,0
+Grapple Shot,Magic,Ordinary,0,"An ally shoots a projectile. If it hits a unit, the ally is dragged to that location, and may strike the hit unit when it arrives.",3.0,0.0,0,0.0,0,0,0,0,0
+Lightning Bolt,Magic,Ordinary,0,Deal 3 damage to a random unit at target location.,2.0,0.0,0,0.0,0,0,0,0,0
+Mortality,Magic,Ordinary,0,Kill all Mortal minions at target location up to two steps away.,2.0,0.0,0,0.0,0,0,0,0,0
+Occult Ritual,Magic,Unique,0,Gain ② this turn for each allied Spellcaster here.,2.0,0.0,0,0.0,0,0,0,0,0
+Psionic Blast,Magic,Exceptional,0,Deal 1 damage to each minion here. They're disabled until your next turn.,2.0,0.0,0,0.0,0,0,0,0,0
+Rain of Arrows,Magic,Ordinary,0,Deal 1 damage to each aboveground minion.,2.0,0.0,0,0.0,0,0,0,0,0
+Raise Dead,Magic,Exceptional,0,Summon a random dead minion.,4.0,0.0,0,0.0,0,0,0,0,0
+Recall,Magic,Exceptional,0,Teleport any number of allied minions to the caster’s location.,2.0,0.0,0,0.0,0,0,0,0,0
+Telekinesis,Magic,Exceptional,0,Caster snatches and picks up target nearby artifact they can carry.,1.0,0.0,0,0.0,0,0,0,0,0
+Teleport,Magic,Ordinary,0,Teleport an ally to the surface of target site.,2.0,0.0,0,0.0,0,0,0,0,0
+Unlikely Alliance,Magic,Elite,0,Draw a card for each rarity among allied minions.,4.0,0.0,0,0.0,0,0,0,0,0
+Waypoint Portal,Magic,Exceptional,0,"Choose two different sites. This turn, units can move between them as if they were adjacent.",3.0,0.0,0,0.0,0,0,0,0,0
+Whirling Blades,Magic,Exceptional,0,"An ally may take up to two steps, and then strikes each enemy along their entire path.",5.0,0.0,0,0.0,0,0,0,0,0
+Windblast,Magic,Exceptional,0,Push everything atop sites one step in a cardinal direction.,2.0,0.0,0,0.0,0,0,0,0,0
+Evil Presence,Aura,Exceptional,0,"You may summon Spirits to affected sites. When you summon a Spirit here, give it Charge, and return Evil Presence to its owner's hand.",2.0,0.0,0,0.0,0,0,0,0,0
+Summoning Sphere,Aura,Exceptional,0,You may summon minions to affected sites.,1.0,0.0,0,0.0,0,0,0,0,0
+Thunderstorm,Aura,Exceptional,0,"At the end of your turn, deal 3 damage to a random unit atop affected sites, then you may move Thunderstorm one step.
+
+Lasts 3 of your turns.",4.0,0.0,0,0.0,0,0,0,0,0
+Wall of Air,Aura,Ordinary,0,"Conjure atop the border of a site you control.
+
+Minions with Airborne or 2 or less power can't traverse Wall of Air.",2.0,0.0,0,0.0,0,0,0,0,0
+Albespine Pikemen,Minion,Exceptional,0,Strikes first while attacking.,3.0,3.0,0,0.0,0,0,0,0,0
+Älvalinne Dryads,Minion,Ordinary,0,Älvalinne Dryads provide ①.,2.0,1.0,0,0.0,0,0,0,0,0
+Amazon Warriors,Minion,Ordinary,0,,5.0,5.0,0,0.0,0,0,0,0,0
+Atlas Wanderers,Minion,Elite,0,"Genesis → This site and an adjacent site change places, carrying along everything of normal size.",5.0,5.0,0,0.0,0,0,0,0,0
+Autumn Unicorn,Minion,Exceptional,0,,3.0,4.0,0,0.0,0,0,0,0,0
+Belmotte Longbowmen,Minion,Ordinary,0,Ranged,3.0,3.0,0,0.0,0,0,0,0,0
+Bone Rabble,Minion,Ordinary,0,"Whenever you play an earth site, you may summon Bone Rabble from your cemetery to that site.",3.0,1.0,0,0.0,0,0,0,0,0
+Bosk Troll,Minion,Ordinary,0,,2.0,3.0,0,0.0,0,0,0,0,0
+Cave Trolls,Minion,Ordinary,0,Burrowing,3.0,3.0,0,0.0,0,0,0,0,0
+Conqueror Worm,Minion,Elite,0,"At the end of your turn, if no enemy units occupy this site, permanently gain control of it.",8.0,8.0,0,0.0,0,0,0,0,0
+Crown Prince,Minion,Unique,0,"Deathrite → If you control another Mortal, return Crown Prince to its owner's hand.",3.0,3.0,0,0.0,0,0,0,0,0
+Dalcean Phalanx,Minion,Exceptional,0,Can only move themselves forward.,4.0,5.0,0,0.0,0,0,0,0,0
+Dwarven Digging Team,Minion,Exceptional,0,"Burrowing
+
+Allied minions occupying nearby sites have Burrowing.",2.0,2.0,0,0.0,0,0,0,0,0
+Frontier Settlers,Minion,Exceptional,0,Tap → Reveal and play your topmost site to an adjacent void or Rubble. Frontier Settlers move there and lose this ability.,2.0,1.0,0,0.0,0,0,0,0,0
+Gneissgnath Gnomes,Minion,Exceptional,0,"Burrowing
+
+At the end of your turn, Gneissgnath Gnomes may burrow.",1.0,1.0,0,0.0,0,0,0,0,0
+Grey Wolves,Minion,Ordinary,0,"Your spellbook may include any number of Grey Wolves.
+ 
+Has +1 power for each other Grey Wolves nearby.",2.0,1.0,0,0.0,0,0,0,0,0
+House Arn Bannerman,Minion,Exceptional,0,Other nearby allies have +1 power.,4.0,2.0,0,0.0,0,0,0,0,0
+King of the Realm,Minion,Unique,0,"Other Mortals have +1 power.
+
+You control all Mortals.",7.0,3.0,0,0.0,0,0,0,0,0
+Land Surveyor,Minion,Ordinary,0,Genesis → Draw a site.,2.0,1.0,0,0.0,0,0,0,0,0
+Mage Slayer,Minion,Ordinary,0,Genesis → Kill target Spellcaster minion nearby.,3.0,2.0,0,0.0,0,0,0,0,0
+Master Tracker,Minion,Elite,0,All enemies permanently lose Stealth.,2.0,2.0,0,0.0,0,0,0,0,0
+Midland Army,Minion,Unique,0,"Tap → Target a location up to three steps away. Deal 4 damage to each unit there.
+
+Deathrite → Summon a Foot Soldier token to each adjacent location.",8.0,8.0,0,0.0,0,0,0,0,0
+Miracle Workers,Minion,Ordinary,0,Genesis → You may return a minion that died this turn from your cemetery to your hand.,2.0,1.0,0,0.0,0,0,0,0,0
+Monastery Gargoyle,Minion,Exceptional,0,"At the start and end of your turn, choose whether Monastery Gargoyle has Airborne or is a non-minion artifact.",5.0,3.0,0,0.0,0,0,0,0,0
+Monster Hunter,Minion,Exceptional,0,Genesis → Kill a nearby Monster.,3.0,2.0,0,0.0,0,0,0,0,0
+Mordric Druids,Minion,Elite,0,"Spellcaster
+
+Whenever you lose life due to an undefended attack nearby, the attacker's controller also loses that much life.",2.0,1.0,0,0.0,0,0,0,0,0
+Mountain Giant,Minion,Elite,0,Occupies four locations.,8.0,8.0,0,0.0,0,0,0,0,0
+Pudge Butcher,Minion,Exceptional,0,"Immobile
+
+Tap → Shoot a projectile. If it hits a unit, drag it to this location. Pudge may fight it.",4.0,5.0,0,0.0,0,0,0,0,0
+Queen of Midland,Minion,Unique,0,"After an opponent draws a card, if they have more cards than you, you may draw a card.",5.0,1.0,0,0.0,0,0,0,0,0
+Root Spider,Minion,Exceptional,0,"Burrowing
+
+While Root Spider is burrowed, minions directly above it are disabled.",3.0,2.0,0,0.0,0,0,0,0,0
+Royal Bodyguard,Minion,Elite,0,"If a nearby Avatar or royalty (King, Queen, Prince, or Princess) would take damage, Royal Bodyguard may take that damage instead.",4.0,4.0,0,0.0,0,0,0,0,0
+Scent Hounds,Minion,Ordinary,0,Nearby enemies permanently lose Stealth.,2.0,2.0,0,0.0,0,0,0,0,0
+Scourge Zombies,Minion,Ordinary,0,"Whenever an allied Mortal dies on land, you may summon Scourge Zombies from your cemetery to its location, tapped.",4.0,2.0,0,0.0,0,0,0,0,0
+Shield Maidens,Minion,Exceptional,0,Nearby allies take 1 less damage.,3.0,2.0,0,0.0,0,0,0,0,0
+Silver Valkyries,Minion,Elite,0,"Airborne
+
+At the end of your turn, untap all allies here.",6.0,4.0,0,0.0,0,0,0,0,0
+Sirian Templar,Minion,Exceptional,0,"Takes no damage from Demon, Spirit, or Undead minions.",3.0,3.0,0,0.0,0,0,0,0,0
+Sisters of Silence,Minion,Elite,0,Other nearby minions lose all non-basic abilities.,2.0,1.0,0,0.0,0,0,0,0,0
+Slumbering Giantess,Minion,Exceptional,0,Genesis → Fall asleep. Slumbering Giantess is disabled until hurt.,3.0,5.0,0,0.0,0,0,0,0,0
+Squirming Mass,Minion,Elite,0,"Whenever a nearby minion dies, Squirming Mass permanently gains its power.",3.0,0.0,0,0.0,0,0,0,0,0
+Stone-gaze Gorgons,Minion,Elite,0,Other minions at rest at adjacent locations are disabled.,5.0,3.0,0,0.0,0,0,0,0,0
+Tragedy Worrywart,Minion,Exceptional,0,Units nearby take no damage from Magic spells.,3.0,1.0,0,0.0,0,0,0,0,0
+Vanguard Knights,Minion,Exceptional,0,Vanguard Knights have +2 power if they alone are the furthest forward of your units.,3.0,2.0,0,0.0,0,0,0,0,0
+Wicked Witch,Minion,Elite,0,"Spellcaster
+
+Other nearby minions have -2 power.",4.0,2.0,0,0.0,0,0,0,0,0
+Wild Boars,Minion,Ordinary,0,,1.0,2.0,0,0.0,0,0,0,0,0
+Wraetannis Titan,Minion,Elite,0,Genesis → Strike each enemy here.,7.0,6.0,0,0.0,0,0,0,0,0
+Yourke Crossbowmen,Minion,Exceptional,0,"Ranged
+
+Takes no damage from ranged strikes.",3.0,3.0,0,0.0,0,0,0,0,0
+Assorted Animals,Magic,Elite,0,"Search your spellbook for different Beasts with a combined mana cost of X or less, reveal them, and put them in your hand. Shuffle your spellbook.",0.0,0.0,0,0.0,0,0,0,0,0
+Border Militia,Magic,Ordinary,0,Summon a Foot Soldier token to each site you control that borders an enemy site.,3.0,0.0,0,0.0,0,0,0,0,0
+Bury,Magic,Ordinary,0,"Burrow target minion or artifact, if able.",3.0,0.0,0,0.0,0,0,0,0,0
+Call to War,Magic,Exceptional,0,"Search your spellbook for an Exceptional Mortal, reveal it, and put it into your hand. Shuffle your spellbook.",2.0,0.0,0,0.0,0,0,0,0,0
+Cave-In,Magic,Exceptional,0,Burrow all minions and artifacts occupying target land site.,4.0,0.0,0,0.0,0,0,0,0,0
+Common Sense,Magic,Ordinary,0,"Search your spellbook for an Ordinary card, reveal it, and put it into your hand. Shuffle your spellbook.",2.0,0.0,0,0.0,0,0,0,0,0
+Craterize,Magic,Elite,0,"As an additional cost to cast Craterize, discard a site. Destroy target site and deal damage to each unit above or below a site in the area of effect:",8.0,0.0,0,0.0,0,0,0,0,0
+Dispel,Magic,Ordinary,0,Destroy all auras and artifacts at target location up to two steps away.,2.0,0.0,0,0.0,0,0,0,0,0
+Divine Healing,Magic,Exceptional,0,You gain 7 life.,1.0,0.0,0,0.0,0,0,0,0,0
+Earthquake,Magic,Elite,0,"You may rearrange sites within a two-by-two area, carrying along everything of normal size. Then burrow all minions and artifacts on those sites.",5.0,0.0,0,0.0,0,0,0,0,0
+Exorcism,Magic,Ordinary,0,Banish all Demon and Undead minions at target location up to two steps away.,2.0,0.0,0,0.0,0,0,0,0,0
+Gigantism,Magic,Unique,0,Give an allied unit +6 power this turn.,4.0,0.0,0,0.0,0,0,0,0,0
+Minecart Madness,Magic,Exceptional,0,"This turn, your units can move between any sites in a chosen span of land as if they were adjacent.",2.0,0.0,0,0.0,0,0,0,0,0
+Overpower,Magic,Ordinary,0,Give an ally +2 power this turn.,1.0,0.0,0,0.0,0,0,0,0,0
+Shield Wall,Magic,Exceptional,0,"Until your next turn, each ally takes 1 less damage for each other ally it's nearby.",3.0,0.0,0,0.0,0,0,0,0,0
+Star-seeds of Uhr,Magic,Unique,0,Fill up to thirteen voids with Rubble.,1.0,0.0,0,0.0,0,0,0,0,0
+Unravel,Magic,Ordinary,0,Destroy all artifacts and Undead minions at a location up to two steps away.,2.0,0.0,0,0.0,0,0,0,0,0
+Crusade,Aura,Unique,0,"You may summon earth minions to affected sites.
+
+Allied earth minions occupying affected sites have +1 power.",2.0,0.0,0,0.0,0,0,0,0,0
+Entangle Terrain,Aura,Ordinary,0,Minions occupying affected sites lose Airborne and are Immobile. Lasts 3 of your turns.,4.0,0.0,0,0.0,0,0,0,0,0
+Rest in Peace,Aura,Elite,0,"Whenever a Spirit or Undead minion occupies affected land sites, burrow it.",5.0,0.0,0,0.0,0,0,0,0,0
+Ancient Dragon,Minion,Elite,0,"Airborne
+
+Tap → Deal 4 damage to each other unit at target location nearby.",7.0,6.0,0,0.0,0,0,0,0,0
+Aramos Mercenaries,Minion,Ordinary,0,You may discard a random card rather than pay this spell's mana cost.,3.0,3.0,0,0.0,0,0,0,0,0
+Askelon Phoenix,Minion,Elite,0,"Airborne
+
+If Askelon Phoenix would take damage from a fire spell or ability, it gains +1 power this turn, instead.",5.0,4.0,0,0.0,0,0,0,0,0
+Awakened Mummies,Minion,Exceptional,0,"Summon Awakened Mummies burrowed safely. When an enemy unit moves onto the ground above them, they unburrow and intercept.",1.0,3.0,0,0.0,0,0,0,0,0
+Azuridge Caravan,Minion,Ordinary,0,Has all elements and minion types.,5.0,4.0,0,0.0,0,0,0,0,0
+Bane Widow,Minion,Exceptional,0,Genesis → May kill target minion here.,4.0,1.0,0,0.0,0,0,0,0,0
+Beast of Burden,Minion,Ordinary,0,May carry any number of allied minions.,2.0,2.0,0,0.0,0,0,0,0,0
+Bull Demons of Adum,Minion,Elite,0,"Tap → Move three steps in a cardinal direction. When Bull Demons of Adum enter each location, they strike each untapped unit there.",5.0,5.0,0,0.0,0,0,0,0,0
+Cauldron Crones,Minion,Ordinary,0,"Spellcaster
+
+Genesis → You may sacrifice another minion here to draw a spell.",3.0,1.0,0,0.0,0,0,0,0,0
+Cerberus in Chains,Minion,Unique,0,"Must be summoned to your location.
+
+Cerberus in Chains automatically follows you and can't move itself away.",3.0,5.0,0,0.0,0,0,0,0,0
+Clamor of Harpies,Minion,Exceptional,0,"Airborne
+
+Genesis → Teleport target weaker minion to this location. Clamor of Harpies may strike it.",4.0,3.0,0,0.0,0,0,0,0,0
+Colicky Dragonettes,Minion,Exceptional,0,"At the end of your turn, Colicky Dragonettes shoot a projectile. It deals 1 damage.",3.0,3.0,0,0.0,0,0,0,0,0
+Courtesan Thaïs,Minion,Unique,0,"Genesis → During their next turn, each player is controlled by the previous one.",5.0,0.0,0,0.0,0,0,0,0,0
+Death Dealer,Minion,Unique,0,Genesis → Kill all other minions.,7.0,4.0,0,0.0,0,0,0,0,0
+Doomsday Prophet,Minion,Unique,0,"Nearby units take double damage, except from strikes.",5.0,1.0,0,0.0,0,0,0,0,0
+Escyllion Cyclops,Minion,Exceptional,0,Doesn’t strike back while defending.,6.0,6.0,0,0.0,0,0,0,0,0
+Far East Assassin,Minion,Elite,0,"Stealth
+
+Tap → Far East Assassin throws an artifact he carries at target adjacent unit. It takes damage equal to the artifact's mana cost.",2.0,2.0,0,0.0,0,0,0,0,0
+Grösse Poltergeist,Minion,Elite,0,"Tap → Until Grosse Poltergeist leaves the realm, gain control of a nearby artifact and animate it. It's an Automaton with power equal to its cost, and has its own bearer abilities.",3.0,1.0,0,0.0,0,0,0,0,0
+Hillock Basilisk,Minion,Exceptional,0,Other minions at rest here or one step in front of Hillock Basilisk are disabled.,4.0,3.0,0,0.0,0,0,0,0,0
+Infernal Legion,Minion,Elite,0,"At the end of your turn, deal 3 damage to each other adjacent unit.",6.0,6.0,0,0.0,0,0,0,0,0
+Karkemish Chimera,Minion,Elite,0,Can simultaneously attack up to three units at the same location.,6.0,6.0,0,0.0,0,0,0,0,0
+Lava Salamander,Minion,Exceptional,0,"Fire Spellcaster
+
+Takes no damage from fire spells.",2.0,1.0,0,0.0,0,0,0,0,0
+Maze Minotaur,Minion,Elite,0,Enemy minions can’t move themselves out of the a maze of nine locations nearby Maze Minotaur.,4.0,4.0,0,0.0,0,0,0,0,0
+Ogre Goons,Minion,Ordinary,0,,3.0,3.0,0,0.0,0,0,0,0,0
+Outback Strider,Minion,Exceptional,0,Moves freely between land sites not occupied by other units.,3.0,3.0,0,0.0,0,0,0,0,0
+Panorama Manticore,Minion,Elite,0,"Airborne, Lethal
+
+At the end of your turn, if you cast a non-fire spell this turn, untap Panorama Manticore.",5.0,5.0,0,0.0,0,0,0,0,0
+Petrosian Cavalry,Minion,Ordinary,0,Charge,4.0,3.0,0,0.0,0,0,0,0,0
+Pit Vipers,Minion,Ordinary,0,"Burrowing, Lethal",1.0,1.0,0,0.0,0,0,0,0,0
+Quarrelsome Kobolds,Minion,Exceptional,0,"At the end of your turn, Quarrelsome Kobolds strike themselves or another target adjacent unit.",3.0,2.0,0,0.0,0,0,0,0,0
+Raal Dromedary,Minion,Ordinary,0,,1.0,2.0,0,0.0,0,0,0,0,0
+Rimland Nomads,Minion,Ordinary,0,"Movement +1
+
+Takes no damage from Deserts.",2.0,2.0,0,0.0,0,0,0,0,0
+Sacred Scarabs,Minion,Ordinary,0,"Airborne
+
+Deathrite → Deal 3 damage to each unit here.",2.0,1.0,0,0.0,0,0,0,0,0
+Sand Worm,Minion,Ordinary,0,"Burrowing, Landbound",4.0,4.0,0,0.0,0,0,0,0,0
+Scavenging Fiend,Minion,Exceptional,0,Genesis → Conjure a broken artifact to this location.,4.0,2.0,0,0.0,0,0,0,0,0
+Seasoned Sellsword,Minion,Elite,0,"Avatars nearby have ""Discard a card → Gain control of Seasoned Sellsword.""",2.0,4.0,0,0.0,0,0,0,0,0
+Sirocco Scorpions,Minion,Ordinary,0,Lethal,2.0,2.0,0,0.0,0,0,0,0,0
+Swiven Scout,Minion,Exceptional,0,"Movement +1
+
+Enemy Avatars within Swiven Scout's range of motion play with their hands revealed.",2.0,2.0,0,0.0,0,0,0,0,0
+Tvinnax Berserker,Minion,Exceptional,0,"Whenever Tvinnax Berserker can attack a unit, he must.
+ 
+Untap Tvinnax Berserker whenever he attacks and kills an enemy minion.",4.0,3.0,0,0.0,0,0,0,0,0
+Vile Imp,Minion,Ordinary,0,Genesis → May deal 2 damage to target adjacent unit.,2.0,2.0,0,0.0,0,0,0,0,0
+Wayfaring Pilgrim,Minion,Exceptional,0,"Whenever Wayfaring Pilgrim enters each corner of the realm for the first time, you may draw a card.",2.0,1.0,0,0.0,0,0,0,0,0
+Wills-o'-the-Wisp,Minion,Exceptional,0,"Voidwalk
+
+Whenever Wills-o’-the-Wisp are attacked, they may teleport to another nearby location or void to evade the attack.",1.0,1.0,0,0.0,0,0,0,0,0
+Backstab,Magic,Exceptional,0,"Target minion moves to an adjacent location, if needed, to strike another target tapped minion there.",2.0,0.0,0,0.0,0,0,0,0,0
+Blaze,Magic,Exceptional,0,"This turn, give an ally Movement +2, it can't be intercepted, and it leaves a trail of fire at departed locations. When it stops, each unit along the trail takes 2 damage.",3.0,0.0,0,0.0,0,0,0,0,0
+Boil,Magic,Ordinary,0,Destroy all minions occupying target water site up to two steps away.,3.0,0.0,0,0.0,0,0,0,0,0
+Cone of Flame,Magic,Exceptional,0,Choose a direction from the caster. Deal damage to each unit at a location in the area of effect:,6.0,0.0,0,0.0,0,0,0,0,0
+Critical Strike,Magic,Ordinary,0,"The next time an ally strikes a unit this turn, it deals double damage.",2.0,0.0,0,0.0,0,0,0,0,0
+Disintegrate,Magic,Elite,0,"Banish target minion nearby, and everything it carries.",3.0,0.0,0,0.0,0,0,0,0,0
+Fireball,Magic,Exceptional,0,"Shoot a projectile. It deals 4 damage on impact, and 2 damage to each other unit at that location.",4.0,0.0,0,0.0,0,0,0,0,0
+Firebolts,Magic,Ordinary,0,"Shoot three projectiles in the same direction, one at a time. Each deals 1 damage.",2.0,0.0,0,0.0,0,0,0,0,0
+Flame Wave,Magic,Elite,0,"Flame Wave flows horizontally, from one edge of the realm to the other. Deal damage to each unit atop sites in the area of effect:",6.0,0.0,0,0.0,0,0,0,0,0
+Heat Ray,Magic,Ordinary,0,Shoot a piercing projectile. Deal 2 damage to one unit at each location along its path.,3.0,0.0,0,0.0,0,0,0,0,0
+Immolation,Magic,Unique,0,Deal 7 damage to target minion nearby.,1.0,0.0,0,0.0,0,0,0,0,0
+Incinerate,Magic,Ordinary,0,Deal 4 damage to each other unit at target location near the caster or an allied Dragon.,5.0,0.0,0,0.0,0,0,0,0,0
+Infiltrate,Magic,Elite,0,"Gain control of target enemy minion until it deals damage, and tap it. It gains Stealth.",4.0,0.0,0,0.0,0,0,0,0,0
+Leap Attack,Magic,Exceptional,0,"An ally may take a step, and then it strikes each enemy at its location.",4.0,0.0,0,0.0,0,0,0,0,0
+Mad Dash,Magic,Ordinary,0,"Draw a card, then give an ally Movement +1 this turn.",2.0,0.0,0,0.0,0,0,0,0,0
+Major Explosion,Magic,Elite,0,"Target a location up to two steps away.
+
+Deal damage to each unit at locations in the area of effect:",7.0,0.0,0,0.0,0,0,0,0,0
+Meteor Shower,Magic,Elite,0,Target three sites that share no borders. Deal damage to each unit atop sites in each area of effect:,9.0,0.0,0,0.0,0,0,0,0,0
+Minor Explosion,Magic,Ordinary,0,Deal 3 damage to each unit at target location up to two steps away.,3.0,0.0,0,0.0,0,0,0,0,0
+Pact with the Devil,Magic,Unique,0,"Sacrifice the caster or lose half your life, rounding up. If you do, draw three cards.",4.0,0.0,0,0.0,0,0,0,0,0
+Poison Nova,Magic,Exceptional,0,"Lethal
+
+Deal 1 damage to each other nearby minion.",5.0,0.0,0,0.0,0,0,0,0,0
+Scorched Earth,Magic,Elite,0,Choose any number of sites you control. Destroy each of those sites and everything there.,3.0,0.0,0,0.0,0,0,0,0,0
+Spin Attack,Magic,Ordinary,0,An ally strikes each enemy at its location.,3.0,0.0,0,0.0,0,0,0,0,0
+Warp Spasm,Magic,Unique,0,"This turn, double an allied minion's power, and whenever it attacks and kills a unit, it untaps. At the end of the turn, it dies.",3.0,0.0,0,0.0,0,0,0,0,0
+Drought,Aura,Exceptional,0,"Affected sites aren't water sites, and provide no water threshold.",4.0,0.0,0,0.0,0,0,0,0,0
+Jihad,Aura,Unique,0,"You may summon fire minions to affected sites.
+
+Allied fire minions occupying affected sites have +1 power.",2.0,0.0,0,0.0,0,0,0,0,0
+Sandstorm,Aura,Ordinary,0,"Affected sites and units atop them can't be attacked or intercepted.
+ 
+At the start of your turn, dispel Sandstorm.",1.0,0.0,0,0.0,0,0,0,0,0
+Wall of Fire,Aura,Ordinary,0,"Conjure atop the border of a site you control.
+ 
+Whenever a unit passes through Wall of Fire, it takes 3 damage.",2.0,0.0,0,0.0,0,0,0,0,0
+Wildfire,Aura,Exceptional,0,"Conjure Wildfire atop a single site nearby.
+
+At the end of each turn, each unit here takes 3 damage, then move Wildfire to an adjacent location it hasn't visited before. If none remain, dispel Wildfire.",4.0,0.0,0,0.0,0,0,0,0,0
+Accursed Albatross,Minion,Exceptional,0,"Airborne
+ 
+When a unit kills Accursed Albatross, kill that unit's other allied minions it's nearby.",3.0,1.0,0,0.0,0,0,0,0,0
+Adept Illusionist,Minion,Elite,0,"Spellcaster
+
+Tap → Search your hand, cemetery, or spellbook for another Adept Illusionist and summon it nearby. Shuffle if needed.",2.0,2.0,0,0.0,0,0,0,0,0
+Anui Undine,Minion,Exceptional,0,"Submerge
+ 
+Anui Undine has +1 power for each site in her body of water.",5.0,0.0,0,0.0,0,0,0,0,0
+Bridge Troll,Minion,Exceptional,0,"Whenever an enemy attacks Bridge Troll, they must spend all of their remaining mana to give to you on your next turn.",4.0,3.0,0,0.0,0,0,0,0,0
+Brobdingnag Bullfrog,Minion,Exceptional,0,Genesis → Brobdingnag Bullfrog swallows another target minion here. He carries it disabled in his belly until he leaves the realm.,3.0,3.0,0,0.0,0,0,0,0,0
+Captain Baldassare,Minion,Unique,0,"Whenever Captain Baldassare attacks a unit or site, the defending player discards their topmost three spells. You may cast each of those spells once this turn, ignoring threshold requirements.",4.0,3.0,0,0.0,0,0,0,0,0
+Coral-Reef Kelpie,Minion,Ordinary,0,Submerge,3.0,3.0,0,0.0,0,0,0,0,0
+Court Jester,Minion,Elite,0,"At the end of your turn, each nearby Avatar discards a random card.",3.0,1.0,0,0.0,0,0,0,0,0
+Deep-Sea Mermaids,Minion,Ordinary,0,"Submerge
+
+Genesis → Draw your bottommost spell.",3.0,1.0,0,0.0,0,0,0,0,0
+Diluvian Kraken,Minion,Elite,0,"Submerge
+
+Tap → Surface to strike each other unit nearby.",8.0,8.0,0,0.0,0,0,0,0,0
+Felbog Frog Men,Minion,Exceptional,0,Can leap entirely over adjacent sites in one step.,2.0,2.0,0,0.0,0,0,0,0,0
+Fenvale Muse,Minion,Ordinary,0,"Spellcaster
+
+Whenever Fenvale Muse casts a spell, you may trigger the Genesis of a nearby River.",1.0,0.0,0,0.0,0,0,0,0,0
+Fey Changeling,Minion,Exceptional,0,"May be summoned to any site.
+
+Genesis → You may return a minion here to its owner’s hand.",3.0,1.0,0,0.0,0,0,0,0,0
+Ghost Ship,Minion,Elite,0,"Voidwalk
+
+Whenever Ghost Ship enters a site from the void, you may summon a Spirit from any cemetery to its location.",6.0,5.0,0,0.0,0,0,0,0,0
+Giant Shark,Minion,Exceptional,0,"Submerge, Waterbound
+ 
+Whenever another unit enters or moves between sites in this body of water, Giant Shark moves to that unit to fight it.",5.0,5.0,0,0.0,0,0,0,0,0
+Great Old One,Minion,Unique,0,"Submerge
+
+Genesis → Permanently flood the entire realm, including voids.",8.0,16.0,0,0.0,0,0,0,0,0
+Guile Sirens,Minion,Exceptional,0,"Submerge
+
+At the start of your turn, force target nearby enemy minion to take a step toward Guile Sirens.",3.0,3.0,0,0.0,0,0,0,0,0
+Lord of Unland,Minion,Unique,0,"Submerge 
+
+Other allies occupying Lord of Unland's body of water have +1 power.",4.0,3.0,0,0.0,0,0,0,0,0
+Megamoeba,Minion,Elite,0,"Megamoeba moves by extending a single pseudopod from any part of itself. It occupies all locations it has ever occupied, and has +1 power for each.",3.0,0.0,0,0.0,0,0,0,0,0
+Mother Nature,Minion,Unique,0,"At the start of your turn, reveal your topmost spell. If it's a minion, you may summon it here.",6.0,3.0,0,0.0,0,0,0,0,0
+Muck Lampreys,Minion,Ordinary,0,"Burrowing, Submerge",2.0,2.0,0,0.0,0,0,0,0,0
+Old Salt Anchorman,Minion,Ordinary,0,Nearby allies can't be moved by enemy spells and abilities.,2.0,2.0,0,0.0,0,0,0,0,0
+Ormund Harpooneers,Minion,Exceptional,0,Tap → Deal 1 damage to target minion above or below an adjacent water site and pull that minion to this location.,2.0,2.0,0,0.0,0,0,0,0,0
+Pirate Ship,Minion,Ordinary,0,Waterbound,4.0,5.0,0,0.0,0,0,0,0,0
+Polar Bears,Minion,Ordinary,0,Can move as if the top and bottom edges of the realm were connected.,2.0,2.0,0,0.0,0,0,0,0,0
+Polar Explorers,Minion,Elite,0,Allied units here can move as if the top and bottom edges of the realm were connected.,2.0,2.0,0,0.0,0,0,0,0,0
+Porcupine Pufferfish,Minion,Ordinary,0,"Lethal, Submerge",1.0,1.0,0,0.0,0,0,0,0,0
+Ruler of Thul,Minion,Unique,0,"Charge 
+
+Allies can move as if the top and bottom edges of the realm were connected. Other allies occupying sites there have +1 power.",4.0,3.0,0,0.0,0,0,0,0,0
+Sea Raider,Minion,Exceptional,0,"Whenever Sea Raider attacks and kills an enemy, its controller discards their topmost spell. You may cast that spell once this turn, ignoring threshold.",3.0,3.0,0,0.0,0,0,0,0,0
+Sea Serpent,Minion,Ordinary,0,"Submerge, Waterbound",4.0,4.0,0,0.0,0,0,0,0,0
+Sedge Crabs,Minion,Ordinary,0,Can only move themselves sideways.,1.0,3.0,0,0.0,0,0,0,0,0
+Seirawan Hydra,Minion,Elite,0,Immune to non-lethal damage.,6.0,6.0,0,0.0,0,0,0,0,0
+Selfsame Simulacrum,Minion,Elite,0,May be summoned as a basic copy of a nearby minion.,4.0,0.0,0,0.0,0,0,0,0,0
+Sneak Thief,Minion,Elite,0,"Stealth
+
+Tap → Steal an artifact out of the hands of another target unit here, and stay Stealthed.",2.0,2.0,0,0.0,0,0,0,0,0
+Swamp Buffalo,Minion,Ordinary,0,,1.0,2.0,0,0.0,0,0,0,0,0
+Swan Maidens,Minion,Ordinary,0,"Airborne, Submerge",2.0,2.0,0,0.0,0,0,0,0,0
+Tide Naiads,Minion,Exceptional,0,"Submerge
+
+This site is flooded. It is a water site.",2.0,2.0,0,0.0,0,0,0,0,0
+Tringh Constrictor,Minion,Exceptional,0,"Tap → Tringh Constrictor may take a step, then it constricts target minion here and carries it disabled. The next time Tringh Constrictor would untap, it instead kills that minion if it's still constricted.",4.0,3.0,0,0.0,0,0,0,0,0
+Tufted Turtles,Minion,Ordinary,0,"The first time Tuft Turtles would take damage each turn, prevent that damage.",3.0,2.0,0,0.0,0,0,0,0,0
+Unland Angler,Minion,Elite,0,"Submerge
+
+At the start of your turn, if Unland Angler is submerged, force each enemy minion atop adjacent sites to take a step toward this one.",5.0,4.0,0,0.0,0,0,0,0,0
+Unland Eel,Minion,Exceptional,0,"Submerge
+
+Whenever Unland Eel submerges, it may drag another minion here down with it.",2.0,2.0,0,0.0,0,0,0,0,0
+Yokai Kappas,Minion,Elite,0,Discard a water site → Untap Yokai Kappas. Use only once per turn.,4.0,3.0,0,0.0,0,0,0,0,0
+Dodge Roll,Magic,Exceptional,0,"May be cast when an ally is attacked.
+
+An attacked ally may move to another adjacent location to evade the attack.",0.0,0.0,0,0.0,0,0,0,0,0
+Drown,Magic,Ordinary,0,"Submerge target minion or artifact, if able.",3.0,0.0,0,0.0,0,0,0,0,0
+Extinguish,Magic,Ordinary,0,Banish all fire minions and fire auras occupying target site up to two steps away.,3.0,0.0,0,0.0,0,0,0,0,0
+Fire Harpoons!,Magic,Ordinary,0,Deal 1 damage to target minion above or below an adjacent Water site and pull it to the caster's location. Draw a card.,2.0,0.0,0,0.0,0,0,0,0,0
+Font of Life,Magic,Exceptional,0,Each ally heals an amount equal to the number of sites in its body of water.,3.0,0.0,0,0.0,0,0,0,0,0
+Frost Nova,Magic,Exceptional,0,Freeze nearby enemy minions. They're disabled until your next turn.,4.0,0.0,0,0.0,0,0,0,0,0
+Geyser,Magic,Exceptional,0,"This turn, flood target site and give each minion there Airborne. Draw a card.",2.0,0.0,0,0.0,0,0,0,0,0
+Ice Lance,Magic,Ordinary,0,"Shoot a piercing projectile. Deal 3, then 2, then 1 damage to up to one unit at each of the first three locations along its path.",3.0,0.0,0,0.0,0,0,0,0,0
+Marine Voyage,Magic,Exceptional,0,"This turn, your units can move between any sites in a chosen body of water as if they were adjacent.",2.0,0.0,0,0.0,0,0,0,0,0
+Plague of Frogs,Magic,Unique,0,Summon seven Frog tokens.,1.0,0.0,0,0.0,0,0,0,0,0
+Pollimorph,Magic,Elite,0,Transform target nearby minion into a Frog token.,2.0,0.0,0,0.0,0,0,0,0,0
+Replication,Magic,Elite,0,Conjure a copy of an artifact carried by the caster.,2.0,0.0,0,0.0,0,0,0,0,0
+Riptide,Magic,Ordinary,0,Target water site pulls in an aboveground unit it's adjacent to. Draw a card.,2.0,0.0,0,0.0,0,0,0,0,0
+Shrink,Magic,Exceptional,0,Set the base power of target nearby unit to 0 until your next turn.,1.0,0.0,0,0.0,0,0,0,0,0
+Sleep,Magic,Ordinary,0,Target minion at a location up to two steps away falls asleep. It's disabled until it takes damage.,2.0,0.0,0,0.0,0,0,0,0,0
+Stormy Seas,Magic,Exceptional,0,Submerge all minions and artifacts occupying target water site.,4.0,0.0,0,0.0,0,0,0,0,0
+Twist of Fate,Magic,Unique,0,Exchange life totals with target opponent. (X) is the difference between your life totals.,0.0,0.0,0,0.0,0,0,0,0,0
+Upwelling,Magic,Exceptional,0,Target a nearby site. Return each artifact and minion there to its owner's hand.,4.0,0.0,0,0.0,0,0,0,0,0
+Wrath of the Sea,Magic,Elite,0,Flood all sites adjacent to a body of water this turn. Then submerge all minions and artifacts on water.,7.0,0.0,0,0.0,0,0,0,0,0
+Abundance,Aura,Elite,0,Each affected site provides one additional mana.,5.0,0.0,0,0.0,0,0,0,0,0
+Atlantean Fate,Aura,Unique,0,"Affected non-Ordinary sites are flooded. They are water sites, only provide Water threshold, and lose all other abilities.
+
+Genesis → Submerge all minions and artifacts atop affected sites.",5.0,0.0,0,0.0,0,0,0,0,0
+Blizzard,Aura,Ordinary,0,"Affected sites and units atop them can't be attacked or intercepted.
+ 
+At the start of your turn, dispel Blizzard.",1.0,0.0,0,0.0,0,0,0,0,0
+Flood,Aura,Exceptional,0,Affected sites are flooded. They're water sites.,4.0,0.0,0,0.0,0,0,0,0,0
+Mariner's Curse,Aura,Exceptional,0,"Whenever a minion enters an affected water site, submerge it and return Mariner's Curse to its owner's hand.",3.0,0.0,0,0.0,0,0,0,0,0
+Silence,Aura,Elite,0,Minions occupying affected sites lose all non-basic abilities.,3.0,0.0,0,0.0,0,0,0,0,0
+Wall of Ice,Aura,Ordinary,0,"Conjure atop the border of a site you control.
+ 
+Units can't traverse Wall of Ice on the ground.",2.0,0.0,0,0.0,0,0,0,0,0
+All-terrain Vestments,Artifact,Elite,0,"Bearer has Burrowing, Submerge, and Voidwalk, if it's a minion.",3.0,0.0,0,0.0,0,0,0,0,0
+Amethyst Core,Artifact,Unique,0,Provides (A) and ① to its controller.,1.0,0.0,0,0.0,0,0,0,0,0
+Angel's Egg,Artifact,Elite,0,"At the end of each turn, the controller of Angel's Egg's site heals 1 life.",3.0,0.0,0,0.0,0,0,0,0,0
+Aquamarine Core,Artifact,Unique,0,Provides (W) and ① to its controller.,1.0,0.0,0,0.0,0,0,0,0,0
+Battering Ram,Artifact,Exceptional,0,Units here have “Tap → Destroy target adjacent Wall or Monument.”,2.0,0.0,0,0.0,0,0,0,0,0
+Belfry,Artifact,Elite,0,"At the end of your turn, untap all nearby allies.",3.0,0.0,0,0.0,0,0,0,0,0
+Black Obelisk,Artifact,Elite,0,"Black Obelisk's site has “At the start of your turn, lose 2 life and gain ② this turn.”",3.0,0.0,0,0.0,0,0,0,0,0
+Blasted Oak,Artifact,Unique,0,"If a spell or non-basic ability can target—in order of precedence—Blasted Oak, its site or location, or anything else at its site or location, it must.",3.0,0.0,0,0.0,0,0,0,0,0
+Buried Treasure,Artifact,Exceptional,0,"If cast, conjure this under an allied land site of an opponent's choice.
+
+When Buried Treasure is carried to the surface, its controller sacrifices it and draws two cards.",3.0,0.0,0,0.0,0,0,0,0,0
+Chains of Prometheus,Artifact,Elite,0,"Whenever a player draws a card, that player taps their strongest untapped minion.",4.0,0.0,0,0.0,0,0,0,0,0
+Crave Golem,Artifact,Exceptional,0,"At the start of each player's turn, Crave Golem attacks a random minion within its range of motion, or takes a step toward the closest minion if it can't.",4.0,3.0,0,0.0,0,0,0,0,0
+Crown of the Victor,Artifact,Unique,0,Bearer has +3 power if they've ever killed a minion.,3.0,0.0,0,0.0,0,0,0,0,0
+Devil's Egg,Artifact,Elite,0,"At the end of each turn, the controller of Devil's Egg's site loses 1 life.",3.0,0.0,0,0.0,0,0,0,0,0
+Doomsday Device,Artifact,Unique,0,"Doomsday Device enters the realm with 6 counters. At the end of each player’s turn, remove a counter. When the last is removed, it detonates!
+
+Deals damage to each unit at affected locations:",4.0,0.0,0,0.0,0,0,0,0,0
+Drums of Doom,Artifact,Elite,0,Damage dealt to minions nearby is lethal.,5.0,0.0,0,0.0,0,0,0,0,0
+Erik's Curiosa,Artifact,Unique,0,Rip Erik's Curiosa to pieces → Draw a card from your collection.,1.0,0.0,0,0.0,0,0,0,0,0
+Flaming Sword,Artifact,Exceptional,0,"Bearer has +1 power, and its strikes splash full damage to each other enemy at a struck unit's location.",4.0,0.0,0,0.0,0,0,0,0,0
+Gilded Aegis,Artifact,Unique,0,"If bearer is a minion and would die, instead fully heal it and banish Gilded Aegis.",2.0,0.0,0,0.0,0,0,0,0,0
+Iron Shackles,Artifact,Exceptional,0,"May be conjured to target enemy minion.
+
+Bearer is disabled.",3.0,0.0,0,0.0,0,0,0,0,0
+Kythera Mechanism,Artifact,Unique,0,Bearer's controller determines all random outcomes.,1.0,0.0,0,0.0,0,0,0,0,0
+Land Deed,Artifact,Elite,0,Bearer has “You control this site.”,4.0,0.0,0,0.0,0,0,0,0,0
+Lucky Charm,Artifact,Exceptional,0,"Bearer's controller has “Whenever you would determine an outcome at random, determine it an extra time and choose one.”",1.0,0.0,0,0.0,0,0,0,0,0
+Maddening Bells,Artifact,Elite,0,Spells cast by a nearby Spellcaster cost ② more to cast.,4.0,0.0,0,0.0,0,0,0,0,0
+Magellan Globe,Artifact,Elite,0,Opposite edges of the realm are connected.,2.0,0.0,0,0.0,0,0,0,0,0
+Magnetic Muzzle,Artifact,Elite,0,"Bearer loses all non-basic abilities, and can't drop Magnetic Muzzle.
+
+At the end of each player’s turn, if Magnetic Muzzle is abandoned, that player attaches it to a nearby minion.",2.0,0.0,0,0.0,0,0,0,0,0
+Mask of Mayhem,Artifact,Elite,0,"Whenever a nearby minion can attack, it must.
+
+Nearby strikes deal double damage.",4.0,0.0,0,0.0,0,0,0,0,0
+Mix Aer,Artifact,Elite,0,"Sacrifice Mix Aer → This turn, bearer's next Air spell requires no threshold and costs ③ less to cast.",1.0,0.0,0,0.0,0,0,0,0,0
+Mix Aqua,Artifact,Elite,0,"Sacrifice Mix Aqua → This turn, bearer's next Water spell requires no threshold and costs ③ less to cast.",1.0,0.0,0,0.0,0,0,0,0,0
+Mix Ignis,Artifact,Elite,0,"Sacrifice Mix Ignis → This turn, bearer's next Fire spell requires no threshold and costs ③ less to cast.",1.0,0.0,0,0.0,0,0,0,0,0
+Mix Terra,Artifact,Elite,0,"Sacrifice Mix Terra → This turn, bearer's next Earth spell requires no threshold and costs ③ less to cast.",1.0,0.0,0,0.0,0,0,0,0,0
+Onyx Core,Artifact,Unique,0,Provides (E) and ① to its controller.,1.0,0.0,0,0.0,0,0,0,0,0
+Orb of Ba'al Berith,Artifact,Unique,0,"The first time each turn a Magic spell is cast nearby, Orb of Ba'al Berith creates a copy. The spell's controller may choose new targets.",5.0,0.0,0,0.0,0,0,0,0,0
+Payload Trebuchet,Artifact,Elite,0,"Tap bearer and another ally here, Discard a card → Deal damage equal to the discarded card's mana cost to each unit at target location up to three steps away.",5.0,0.0,0,0.0,0,0,0,0,0
+Pendulum of Peril,Artifact,Unique,0,"At the end of each player's turn, Pendulum of Peril kills all minions at its current location and another adjacent location of that player's choice.",6.0,0.0,0,0.0,0,0,0,0,0
+Philosopher's Stone,Artifact,Unique,0,The first spell of each element cast by the bearer each turn costs ① less.,1.0,0.0,0,0.0,0,0,0,0,0
+Pnakotic Manuscript,Artifact,Unique,0,Bearer has “Tap → Reveal your topmost spell and draw it. Bearer takes damage equal to that card's cost.”,2.0,0.0,0,0.0,0,0,0,0,0
+Poisonous Dagger,Artifact,Exceptional,0,Bearer has Lethal.,2.0,0.0,0,0.0,0,0,0,0,0
+Purge Juggernaut,Artifact,Elite,0,"At the start of your turn, Purge Juggernaut taps and moves to an adjacent location. Kill all minions there.",6.0,4.0,0,0.0,0,0,0,0,0
+Rolling Boulder,Artifact,Exceptional,0,Units here have “Tap → Give Rolling Boulder a push. It rolls as far as possible and deals 4 damage to each other unit along its path.”,4.0,0.0,0,0.0,0,0,0,0,0
+Ruby Core,Artifact,Unique,0,Provides (F) and ① to its controller.,1.0,0.0,0,0.0,0,0,0,0,0
+Scarecrow,Artifact,Ordinary,0,"Genesis → Return each Airborne minion here to its owner’s hand.
+ 
+ Airborne minions can't enter this location.",2.0,0.0,0,0.0,0,0,0,0,0
+Screaming Skull,Artifact,Elite,0,"Whenever bearer attacks and kills an enemy, it untaps.",3.0,0.0,0,0.0,0,0,0,0,0
+Seven-League Boots,Artifact,Unique,0,Bearer has Movement +7.,3.0,0.0,0,0.0,0,0,0,0,0
+Siege Ballista,Artifact,Exceptional,0,Tap bearer and another ally here → Deal 3 damage to target unit up to two steps away.,3.0,0.0,0,0.0,0,0,0,0,0
+Spear of Destiny,Artifact,Unique,0,Bearer has “Tap → Throw Spear of Destiny at any minion anywhere. It teleports to that minion’s location and kills it.”,5.0,0.0,0,0.0,0,0,0,0,0
+Sunken Treasure,Artifact,Exceptional,0,"If cast, conjure this under an allied water site of an opponent's choice.
+
+When Sunken Treasure is carried to the surface, its controller sacrifices it and draws two cards.",3.0,0.0,0,0.0,0,0,0,0,0
+The Immortal Throne,Artifact,Unique,0,"Whenever anyone plays a card with cost equal to the number of level counters on The Immortal Throne, they draw a card and add a level counter.
+
+At level 8 or more, an Avatar here alone wins the game.",4.0,0.0,0,0.0,0,0,0,0,0
+Torshammar Trinket,Artifact,Exceptional,0,"Bearer has +1 power.
+ 
+At the end of your turn, return this to its owner’s hand.",1.0,0.0,0,0.0,0,0,0,0,0
+Truesight Crossbow,Artifact,Exceptional,0,Bearer has Ranged and can target Stealth units.,2.0,0.0,0,0.0,0,0,0,0,0
+Undertaker Engine,Artifact,Elite,0,"At the end of your turn, you may burrow and/or unburrow any combination of artifacts and minions at this site.",7.0,4.0,0,0.0,0,0,0,0,0
+Wicker Manikin,Artifact,Ordinary,0,Non-fire Spellcaster,1.0,1.0,0,0.0,0,0,0,0,0
+Wings of Invention,Artifact,Exceptional,0,"Bearer has Airborne and Movement +1, if it's a minion.",2.0,0.0,0,0.0,0,0,0,0,0
+Cloud City,Site,Unique,0,"(A)(A)(A) — Once on your turn, this site may fly to a nearby void.",0.0,0.0,0,0.0,0,0,0,0,0
+Dark Tower,Site,Ordinary,0,"Genesis → If this is the only Dark Tower you control, gain ① this turn.",0.0,0.0,0,0.0,0,0,0,0,0
+Gothic Tower,Site,Ordinary,0,"Genesis → If this is the only Gothic Tower you control, gain ① this turn.",0.0,0.0,0,0.0,0,0,0,0,0
+Lone Tower,Site,Ordinary,0,"Genesis → If this is the only Lone Tower you control, gain ① this turn.",0.0,0.0,0,0.0,0,0,0,0,0
+Mountain Pass,Site,Exceptional,0,Minions can't enter this site on the ground if there's already a minion atop.,0.0,0.0,0,0.0,0,0,0,0,0
+Observatory,Site,Elite,0,Genesis → Look at your next three spells. Put them back in any order.,0.0,0.0,0,0.0,0,0,0,0,0
+Updraft Ridge,Site,Exceptional,0,Airborne minions atop Updraft Ridge have Movement +1.,0.0,0.0,0,0.0,0,0,0,0,0
+Watchtower,Site,Exceptional,0,Enemy units atop nearby sites permanently lose Stealth.,0.0,0.0,0,0.0,0,0,0,0,0
+Bedrock,Site,Exceptional,0,"Can't be moved, destroyed, or modified.",0.0,0.0,0,0.0,0,0,0,0,0
+Gnome Hollows,Site,Exceptional,0,Units with 3 or more power can’t enter this site.,0.0,0.0,0,0.0,0,0,0,0,0
+Holy Ground,Site,Exceptional,0,Genesis → Each nearby Avatar heals 3 life.,0.0,0.0,0,0.0,0,0,0,0,0
+Humble Village,Site,Ordinary,0,Genesis → You may pay ① to summon a Foot Soldier token here.,0.0,0.0,0,0.0,0,0,0,0,0
+Kingdom of Agartha,Site,Unique,0,(E)(E)(E) — All minions have Burrowing.,0.0,0.0,0,0.0,0,0,0,0,0
+Pillar of Zeiros,Site,Unique,0,"Genesis → Banish all dead minions, and you heal 1 life for each.",0.0,0.0,0,0.0,0,0,0,0,0
+Quagmire,Site,Exceptional,0,"Genesis → Until your next turn, units are Immobile while they occupy nearby sites.",0.0,0.0,0,0.0,0,0,0,0,0
+Rift Valley,Site,Elite,0,You may pull apart a partial row or column to make a void in which to play this.,0.0,0.0,0,0.0,0,0,0,0,0
+Rustic Village,Site,Ordinary,0,Genesis → You may pay ① to summon a Foot Soldier token here.,0.0,0.0,0,0.0,0,0,0,0,0
+Secret Tunnel,Site,Exceptional,0,Burrowed allies can move as if this were adjacent to your other sites.,0.0,0.0,0,0.0,0,0,0,0,0
+Simple Village,Site,Ordinary,0,Genesis → You may pay ① to summon a Foot Soldier token here.,0.0,0.0,0,0.0,0,0,0,0,0
+Vantage Hills,Site,Exceptional,0,Ranged units atop this site have +1 range.,0.0,0.0,0,0.0,0,0,0,0,0
+Arid Desert,Site,Ordinary,0,Genesis → Deal 1 damage to each minion atop target nearby site.,0.0,0.0,0,0.0,0,0,0,0,0
+Dwarven Forge,Site,Elite,0,"Anyone may conjure Weapons and Armor here, and for ① less.",0.0,0.0,0,0.0,0,0,0,0,0
+Mirage,Site,Elite,0,"When played, you may return a site in play you own to your hand to play this site in its place.",0.0,0.0,0,0.0,0,0,0,0,0
+Red Desert,Site,Ordinary,0,Genesis → Deal 1 damage to each minion atop target nearby site.,0.0,0.0,0,0.0,0,0,0,0,0
+Remote Desert,Site,Ordinary,0,Genesis → Deal 1 damage to each minion atop target nearby site.,0.0,0.0,0,0.0,0,0,0,0,0
+River of Flame,Site,Unique,0,Fire Spellcaster,0.0,0.0,0,0.0,0,0,0,0,0
+Shifting Sands,Site,Exceptional,0,Genesis → Reactivate the Genesis abilities of your nearby Deserts.,0.0,0.0,0,0.0,0,0,0,0,0
+Smokestacks of Gnaak,Site,Unique,0,Other nearby sites lose their abilities.,0.0,0.0,0,0.0,0,0,0,0,0
+Vesuvius,Site,Unique,0,(F)(F)(F) — Sacrifice Vesuvius → Each unit occupying nearby sites takes 3 damage.,0.0,0.0,0,0.0,0,0,0,0,0
+Autumn River,Site,Ordinary,0,Genesis → Look at your next spell. You may put it on the bottom of your spellbook.,0.0,0.0,0,0.0,0,0,0,0,0
+Floodplain,Site,Exceptional,0,"Once on your turn, you may flood an adjacent site this turn.",0.0,0.0,0,0.0,0,0,0,0,0
+Iceberg,Site,Exceptional,0,Minions occupying nearby sites can't submerge or surface.,0.0,0.0,0,0.0,0,0,0,0,0
+Island Leviathan,Site,Elite,0,(W)(W)(W)(W)(W)(W)(W)(W) — May transform into a Monster. Place flooded Rubble underneath.,0.0,8.0,0,0.0,0,0,0,0,0
+Maelström,Site,Unique,0,"At the start of your turn, you may pull in each minion in this body of water one step.",0.0,0.0,0,0.0,0,0,0,0,0
+Spring River,Site,Ordinary,0,Genesis → Look at your next spell. You may put it on the bottom of your spellbook.,0.0,0.0,0,0.0,0,0,0,0,0
+Summer River,Site,Ordinary,0,Genesis → Look at your next spell. You may put it on the bottom of your spellbook.,0.0,0.0,0,0.0,0,0,0,0,0
+Tadpole Pool,Site,Unique,0,(W)(W)(W) — Genesis → Summon three submerged Frog tokens here.,0.0,0.0,0,0.0,0,0,0,0,0
+Undertow,Site,Exceptional,0,"Genesis → Staying within this body of water, move target unit one step.",0.0,0.0,0,0.0,0,0,0,0,0
+Aqueduct,Site,Exceptional,0,,0.0,0.0,0,0.0,0,0,0,0,0
+Lighthouse,Site,Exceptional,0,,0.0,0.0,0,0.0,0,0,0,0,0
+Oasis,Site,Exceptional,0,,0.0,0.0,0,0.0,0,0,0,0,0
+Pristine Paradise,Site,Unique,0,Provides no mana or threshold unless completely empty.,0.0,0.0,0,0.0,0,0,0,0,0
+Ruins,Site,Exceptional,0,,0.0,0.0,0,0.0,0,0,0,0,0
+Steppe,Site,Exceptional,0,,0.0,0.0,0,0.0,0,0,0,0,0
+The Colour Out of Space,Site,Unique,0,Provides no mana or threshold if not adjacent to the void.,0.0,0.0,0,0.0,0,0,0,0,0
+Windmill,Site,Exceptional,0,,0.0,0.0,0,0.0,0,0,0,0,0
+Astral Alcazar,Site,Elite,0,Units can move between this site and any void as if they were adjacent.,0.0,0.0,0,0.0,0,0,0,0,0
+Battlefield,Site,Elite,0,Genesis → Conjure a broken Weapon or Armor here.,0.0,0.0,0,0.0,0,0,0,0,0
+Boneyard,Site,Unique,0,Genesis → Each player may summon a minion from their cemetery here.,0.0,0.0,0,0.0,0,0,0,0,0
+Bottomless Pit,Site,Elite,0,"Whenever a non-Airborne minion enters this site, kill it.",0.0,0.0,0,0.0,0,0,0,0,0
+Cornerstone,Site,Exceptional,0,You may play this site to any corner.,0.0,0.0,0,0.0,0,0,0,0,0
+Crossroads,Site,Elite,0,Genesis → Look at your next four sites. Put three on the bottom of your atlas.,0.0,0.0,0,0.0,0,0,0,0,0
+Dome of Osiros,Site,Unique,0,This site and minions here can't be attacked.,0.0,0.0,0,0.0,0,0,0,0,0
+Donnybrook Inn,Site,Unique,0,Anyone may cast minions here and they may do so for ① less.,0.0,0.0,0,0.0,0,0,0,0,0
+Edge of the World,Site,Elite,0,Must always be adjacent to the void.,0.0,0.0,0,0.0,0,0,0,0,0
+Free City,Site,Exceptional,0,"Once per turn, may attack or defend against enemy units here.",0.0,3.0,0,0.0,0,0,0,0,0
+Great Wall,Site,Unique,0,Enemy units can’t move through this site’s top border on the ground.,0.0,0.0,0,0.0,0,0,0,0,0
+Imperial Road,Site,Elite,0,"Genesis → Target opponent, then you, may play a site adjacent to this one.",0.0,0.0,0,0.0,0,0,0,0,0
+Mirror Realm,Site,Unique,0,This site enters the realm as a copy of another nearby site.,0.0,0.0,0,0.0,0,0,0,0,0
+Mudflow,Site,Exceptional,0,"At the start of your turn, surface or unburrow each minion occupying target site nearby.",0.0,0.0,0,0.0,0,0,0,0,0
+Planar Gate,Site,Elite,0,"Minions here can traverse the void, gaining Voidwalk until leaving it.",0.0,0.0,0,0.0,0,0,0,0,0
+Primordial Spring,Site,Elite,0,"Genesis → If you control fewer sites than any opponent, draw three sites.",0.0,0.0,0,0.0,0,0,0,0,0
+Roots of Yggdrasil,Site,Unique,0,"When the Roots of Yggdrasil are destroyed, destroy everything.",0.0,0.0,0,0.0,0,0,0,0,0
+Sinkhole,Site,Elite,0,Sacrifice Sinkhole → Destroy a nearby site.,0.0,0.0,0,0.0,0,0,0,0,0
+Standing Stones,Site,Elite,0,Minions here are Spellcasters.,0.0,0.0,0,0.0,0,0,0,0,0
+The Geistwood,Site,Unique,0,Genesis abilities here are also Deathrite abilities.,0.0,0.0,0,0.0,0,0,0,0,0
+Vaults of Zul,Site,Unique,0,"The first time an Avatar stops here, they draw three cards and skip their next turn.",0.0,0.0,0,0.0,0,0,0,0,0
+Avatar of Air,Avatar,Elite,0,"Tap → Play or draw a site.
+
+Once on your turn, if you occupy an Air site, you may fly a unit atop it to a nearby site.",0.0,1.0,0,20.0,0,0,0,0,0
+Avatar of Earth,Avatar,Elite,0,"Tap → Play or draw a site.
+
+You have +1 power for each nearby earth site.",0.0,1.0,0,20.0,0,0,0,0,0
+Avatar of Fire,Avatar,Elite,0,"Tap → Play or draw a site.
+
+Tap → This turn, fire sites in your hand are also Fireballs.",0.0,1.0,0,20.0,0,0,0,0,0
+Avatar of Water,Avatar,Elite,0,"Tap → Play or draw a site.
+
+Tap → Flood a site adjacent to your body of water until you do so again. You may teleport there.",0.0,1.0,0,20.0,0,0,0,0,0
+Battlemage,Avatar,Elite,0,"Tap → Play or draw a site.
+
+Whenever Battlemage attacks and kills an enemy, you may draw a spell.",0.0,3.0,0,20.0,0,0,0,0,0
+Deathspeaker,Avatar,Elite,0,"Tap → Play or draw a site.
+
+You may cast one dead minion each turn, and for (0) if you’re on Death’s Door. Whenever you summon a minion this way, banish it.",0.0,1.0,0,20.0,0,0,0,0,0
+Elementalist,Avatar,Elite,0,"Tap → Play or draw a site.
+ 
+You have an additional (E)(F)(W)(A).",0.0,1.0,0,20.0,0,0,0,0,0
+Enchantress,Avatar,Elite,0,"Tap → Play or draw a site.
+
+Whenever you cast a spell, you may animate target aura until your next turn. It’s an aura minion with power equal to its cost.",0.0,1.0,0,20.0,0,0,0,0,0
+Pathfinder,Avatar,Unique,0,"Your atlas can’t contain duplicates. Draw no sites during setup.
+
+Tap → Reveal and play the topmost site of your atlas to an adjacent void or Rubble and move there.",0.0,1.0,0,20.0,0,0,0,0,0
+Seer,Avatar,Elite,0,"Tap → Play or draw a site.
+
+At the start of your turn, look at your topmost site or spell. You may put it on the bottom of its deck.",0.0,1.0,0,20.0,0,0,0,0,0
+Sorcerer,Avatar,Ordinary,0,"Tap → Play or draw a site.
+
+Tap → Draw a spell.",0.0,1.0,0,20.0,0,0,0,0,0
+Relentless Crowd,Minion,Ordinary,0,"Your spellbook may include any number of Relentless Crowds.
+
+Has +1 power for each other Relentless Crowd nearby.",2.0,2.0,0,0.0,0,0,0,0,0
+Winter River,Site,Ordinary,0,Genesis → Look at your next spell. You may put it on the bottom of your spellbook.,0.0,0.0,0,0.0,0,0,0,0,0
+Sparkmage,Avatar,Ordinary,0,"Tap → Play or draw a site.
+
+Tap → Target nearby location. Deal damage to another random unit there equal to the sum of (A) on spells you've cast this turn.",0.0,1.0,0,20.0,0,0,0,0,0
+Geomancer,Avatar,Ordinary,0,"Tap → Play or draw a site. If you played an earth site, fill a void adjacent to you with Rubble.
+
+Tap → Replace an adjacent Rubble with the topmost site of your atlas.",0.0,1.0,0,20.0,0,0,0,0,0
+Flamecaller,Avatar,Ordinary,0,"Tap → Play or draw a site.
+ 
+Tap, Banish all your dead fire minions → Shoot a projectile. It deals damage equal to to the sum of their (F).",0.0,1.0,0,20.0,0,0,0,0,0
+Waveshaper,Avatar,Ordinary,0,"Tap → Play or draw a site.
+
+Tap → Flood a site near your body of water until you do so again. Tap minions without submerge there. They don't untap the next time they would.",0.0,1.0,0,20.0,0,0,0,0,0
+Spellslinger,Avatar,Ordinary,0,"Start the game with 4 spells in hand.
+
+Tap → Play or draw a site.",0.0,1.0,0,20.0,0,0,0,0,0
+Spire,Site,Ordinary,0,Your atlas may include any number of Spires.,0.0,0.0,0,0.0,0,0,0,0,0
+Stream,Site,Ordinary,0,Your atlas may include any number of Streams.,0.0,0.0,0,0.0,0,0,0,0,0
+Valley,Site,Ordinary,0,Your atlas may include any number of Valleys.,0.0,0.0,0,0.0,0,0,0,0,0
+Wasteland,Site,Ordinary,0,Your atlas may include any number of Wastelands.,0.0,0.0,0,0.0,0,0,0,0,0
+13 Treasures of Britain,Artifact,Unique,0,"When picked up, bearer's controller draws a card. Teleport the Treasures to the top of a random site or void.",4.0,0.0,0,0.0,0,0,0,0,0
+A Midsummer Night's Dream,Aura,Unique,0,Mortals here are disabled and each give +1 power to all Faeries here. Dispel if there are no Faeries here.,3.0,0.0,0,0.0,0,0,0,0,0
+Amulet of Niniane,Artifact,Unique,0,Bearer can't be targeted or damaged by magic.,1.0,0.0,0,0.0,0,0,0,0,0
+Annual Fair,Site,Exceptional,0,"(1) → Gain (A), (E), (F), or (W) this turn.",0.0,0.0,0,0.0,0,0,0,0,0
+Arcane Barrage,Magic,Elite,0,"Shoot X projectiles in the same direction, one at a time. Each deals 1 damage.",0.0,0.0,0,0.0,0,0,0,0,0
+Archimago,Avatar,Elite,0,"Tap → Play or draw a site.
+
+Banish three magic spells in your cemetery → Cast a copy of one of them.",0.0,1.0,0,20.0,0,0,0,0,0
+Arc Lightning,Magic,Ordinary,0,Deal 4 damage to target nearby unit.,4.0,0.0,0,0.0,0,0,0,0,0
+Attack by Night,Magic,Exceptional,0,Enemies drop their artifacts. Allied units strike first this turn.,3.0,0.0,0,0.0,0,0,0,0,0
+Avalon,Site,Unique,0,Provides mana and threshold for everyone.,0.0,0.0,0,0.0,0,0,0,0,0
+Babbling Brook,Site,Exceptional,0,"Genesis → Until your next turn, minions are disabled while atop nearby sites.",0.0,0.0,0,0.0,0,0,0,0,0
+Bailey,Artifact,Exceptional,0,Enemies can't move to here on the ground.,3.0,0.0,0,0.0,0,0,0,0,0
+Ball Lightning,Magic,Elite,0,"Shoot a projectile. It deals 4 damage on impact, then changes direction. Its next impact deals 2, then it changes direction. Its final impact deals 1.",5.0,0.0,0,0.0,0,0,0,0,0
+Band of Thieves,Minion,Ordinary,0,Stealth,3.0,3.0,0,0.0,0,0,0,0,0
+Beacon,Site,Exceptional,0,Genesis → Gain (1) for each nearby site with an enemy atop it.,0.0,0.0,0,0.0,0,0,0,0,0
+Black Knight,Minion,Exceptional,0,Costs (2) less to cast if you have more life than each opponent.,5.0,5.0,0,0.0,0,0,0,0,0
+Blacksmith Family,Minion,Ordinary,0,Provides (F),2.0,2.0,0,0.0,0,0,0,0,0
+Bluecap Knockers,Minion,Exceptional,0,"Burrowing
+
+Bluecap Knockers’ site can't be moved, destroyed, or modified.",3.0,3.0,0,0.0,0,0,0,0,0
+Blue Knight,Minion,Exceptional,0,Lance,3.0,3.0,0,0.0,0,0,0,0,0
+Blunderbore,Minion,Unique,0,Allied Giants banish the minions they kill to permanently gain +1 power.,5.0,5.0,0,0.0,0,0,0,0,0
+Bog,Site,Ordinary,0,"Genesis → Until your next turn, units are Immobile while atop target nearby site.",0.0,0.0,0,0.0,0,0,0,0,0
+Bonfire,Site,Ordinary,0,Genesis → You may destroy all Weapons and Armor nearby.,0.0,0.0,0,0.0,0,0,0,0,0
+Boudicca,Minion,Unique,0,Other allies have +3 power while successfully attacking sites.,4.0,3.0,0,0.0,0,0,0,0,0
+Bower of Bliss,Site,Unique,0,Mortals in the realm become Beasts and are silenced.,0.0,0.0,0,0.0,0,0,0,0,0
+Briar Patch,Site,Exceptional,0,"Whenever an enemy unit enters or leaves this site, it takes 1 damage.",0.0,0.0,0,0.0,0,0,0,0,0
+Brocéliande,Site,Unique,0,Genesis → Untap nearby Faeries. Tap nearby Mortals. Give nearby Beasts Stealth.,0.0,0.0,0,0.0,0,0,0,0,0
+Brother Knight,Minion,Elite,0,Genesis → You may search your spellbook or hand for another Brother Knight and summon it here. Shuffle if needed.,4.0,3.0,0,0.0,0,0,0,0,0
+Brown Bears,Minion,Ordinary,0,,4.0,4.0,0,0.0,0,0,0,0,0
+Burning Hands,Magic,Ordinary,0,May be cast by an allied Mortal. Choose two different cardinal directions and deal damage to each unit at locations in the area of effect:,3.0,0.0,0,0.0,0,0,0,0,0
+Caerleon-Upon-Usk,Site,Unique,0,Only provides mana and threshold while in your back row.,0.0,0.0,0,0.0,0,0,0,0,0
+Camelot,Site,Unique,0,Unique minions cost (1) less to cast to nearby sites.,0.0,0.0,0,0.0,0,0,0,0,0
+Cast into Exile,Magic,Exceptional,0,Shuffle target minion occupying an allied site into its owner's spellbook.,2.0,0.0,0,0.0,0,0,0,0,0
+Castle Haunt,Minion,Exceptional,0,"May be cast to any Elite or Unique site.
+
+Dies if it leaves its summoning site.",3.0,4.0,0,0.0,0,0,0,0,0
+Castle's Ablaze!,Aura,Elite,0,"Conjure atop an Elite or Unique site.
+
+At the start of your turn, destroy this site, minions atop it, and Castle's Ablaze.",3.0,0.0,0,0.0,0,0,0,0,0
+Castle Servants,Minion,Ordinary,0,Provides (A),2.0,2.0,0,0.0,0,0,0,0,0
+Charge,Magic,Ordinary,0,Give an ally Charge this turn.,1.0,0.0,0,0.0,0,0,0,0,0
+Cold Iron Rod,Artifact,Exceptional,0,Faeries here are disabled.,1.0,0.0,0,0.0,0,0,0,0,0
+Common Cottagers,Minion,Ordinary,0,Provides (E),2.0,2.0,0,0.0,0,0,0,0,0
+Common Village,Site,Ordinary,0,Genesis → You may pay (1) to summon a Foot Soldier token here.,0.0,0.0,0,0.0,0,0,0,0,0
+Coy Nixie,Minion,Exceptional,0,"Submerge
+
+Once on your turn, Coy Nixie may force target nearby enemy to take a step towards her. Tap that enemy.",3.0,2.0,0,0.0,0,0,0,0,0
+Cursed Land,Site,Elite,0,"Whenever another site is played nearby, its controller loses 2 life.",0.0,0.0,0,0.0,0,0,0,0,0
+Dame Britomart,Minion,Unique,0,"Lance
+
+If Dame Britomart would successfully attack an enemy site, she may summon a Mortal from your cemetery to her location instead.",5.0,3.0,0,0.0,0,0,0,0,0
+Degradation,Magic,Exceptional,0,Transform a Mortal into a Foot Soldier token.,2.0,0.0,0,0.0,0,0,0,0,0
+Dirium Fomorians,Minion,Exceptional,0,"Burrowing, Submerge",7.0,6.0,0,0.0,0,0,0,0,0
+Dozmary Pool,Site,Unique,0,(W)(W)(W) – Genesis → You may submerge an artifact from your hand here.,0.0,0.0,0,0.0,0,0,0,0,0
+Druid,Avatar,Elite,0,"Tap → Play or draw a site. If you played a site and you don't control Tawny, summon her there.
+
+Tap → Summon Bruin here. Flip this card.",0.0,1.0,0,20.0,0,0,0,0,0
+Duel,Magic,Ordinary,0,An ally fights target enemy adjacent to it.,3.0,0.0,0,0.0,0,0,0,0,0
+Excalibur,Artifact,Unique,0,"Bearer has +1 power for each of their elements. If they have all four, they are also immune to damage.",2.0,0.0,0,0.0,0,0,0,0,0
+Fae City,Site,Exceptional,0,Tap an allied Faerie here → Shoot a projectile. It deals 1 damage.,0.0,0.0,0,0.0,0,0,0,0,0
+Fail-not Bow,Artifact,Unique,0,Bearer has Ranged 3.,4.0,0.0,0,0.0,0,0,0,0,0
+Feast for Crows,Magic,Unique,0,"Name a spell. Search an opponent's hand, spellbook and cemetery for cards with that name, and banish them. They shuffle.",3.0,0.0,0,0.0,0,0,0,0,0
+Field Laborers,Minion,Ordinary,0,Tap → Gain (2) this turn.,3.0,2.0,0,0.0,0,0,0,0,0
+Fields of Camlann,Site,Unique,0,(F)(F)(F) – Genesis → Each player chooses one of their minions. Kill the rest.,0.0,0.0,0,0.0,0,0,0,0,0
+Fine Courser,Minion,Exceptional,0,"Charge, Movement +1
+
+May carry an ally.",2.0,1.0,0,0.0,0,0,0,0,0
+Finwife,Minion,Ordinary,0,"Submerge
+
+Provides (2) for each nearby enemy Avatar.",2.0,2.0,0,0.0,0,0,0,0,0
+Firebreathing,Magic,Exceptional,0,May be cast by an allied Beast or Dragon. Choose a cardinal direction and deal damage to each unit at a location in the area of effect:,4.0,0.0,0,0.0,0,0,0,0,0
+Fisherman's Family,Minion,Ordinary,0,Provides (W),2.0,2.0,0,0.0,0,0,0,0,0
+Forge,Site,Ordinary,0,Genesis → You may pay (1) to conjure a Lance token here.,0.0,0.0,0,0.0,0,0,0,0,0
+Fourberie Knot,Artifact,Exceptional,0,"Bearer minion takes no damage from units with 4 or more power, and is also a Faerie.",1.0,0.0,0,0.0,0,0,0,0,0
+Four Waters of Paradise,Artifact,Unique,0,"Sacrifice Four Waters → This turn, bearer's next elemental spell requires no threshold and costs (4) less to cast.",2.0,0.0,0,0.0,0,0,0,0,0
+Frisky Red Squirrel,Minion,Exceptional,0,Genesis → Take target nearby artifact that can be carried and hide it beneath this site.,1.0,1.0,0,0.0,0,0,0,0,0
+Funeral Pyre,Site,Exceptional,0,Genesis → Banish up to three cards from one cemetery.,0.0,0.0,0,0.0,0,0,0,0,0
+Giant Killer,Minion,Exceptional,0,Genesis → Kill target nearby Giant.,3.0,2.0,0,0.0,0,0,0,0,0
+Glastonbury Tor,Site,Unique,0,Only provides mana and threshold while in your back row.,0.0,0.0,0,0.0,0,0,0,0,0
+Golden Harp,Artifact,Elite,0,Strike damage and life loss caused by nearby units is reduced to 2.,3.0,0.0,0,0.0,0,0,0,0,0
+Goswhit Helmet,Artifact,Elite,0,"If bearer would take strike damage, prevent it and return this helmet to hand.",3.0,0.0,0,0.0,0,0,0,0,0
+Grain Sparrow,Minion,Ordinary,0,"Airborne
+
+Genesis → Gain 2 life.",1.0,1.0,0,0.0,0,0,0,0,0
+Grand Old Boar,Minion,Elite,0,Has Charge if there are dead Squeakers.,5.0,5.0,0,0.0,0,0,0,0,0
+Grievous Insult,Magic,Ordinary,0,May be cast by any ally. Silence target nearby minion this turn and tap it. Draw a spell.,2.0,0.0,0,0.0,0,0,0,0,0
+Grim Guisarme,Artifact,Elite,0,Bearer takes and deals double strike damage.,3.0,0.0,0,0.0,0,0,0,0,0
+Guards!,Magic,Elite,0,Summon a Foot Soldier token to each site near your Avatar.,6.0,0.0,0,0.0,0,0,0,0,0
+Hamlet,Site,Ordinary,0,Ordinary minions cost (1) less to cast to this site.,0.0,0.0,0,0.0,0,0,0,0,0
+Hamlet's Ablaze!,Aura,Ordinary,0,"Conjure atop an Ordinary or Exceptional site.
+
+At the start of your turn, destroy this site, minions atop it, and Hamlet's Ablaze.",3.0,0.0,0,0.0,0,0,0,0,0
+Harassing Ruffians,Minion,Ordinary,0,Units attacked by Harrassing Ruffians can't be defended.,3.0,3.0,0,0.0,0,0,0,0,0
+Helpful Hob,Minion,Ordinary,0,Genesis → Untap an adjacent ally.,4.0,1.0,0,0.0,0,0,0,0,0
+Horn of Caerleon,Artifact,Elite,0,Nearby minions have Charge.,4.0,0.0,0,0.0,0,0,0,0,0
+Hunter's Lodge,Site,Ordinary,0,Genesis → Enemies lose Stealth.,0.0,0.0,0,0.0,0,0,0,0,0
+Hunting Party,Minion,Exceptional,0,"Ranged
+
+Nearby enemies lose Stealth.",4.0,3.0,0,0.0,0,0,0,0,0
+Hyter Sprites,Minion,Ordinary,0,Genesis → Name a spell. Spells with that name can’t be cast until your next turn.,2.0,2.0,0,0.0,0,0,0,0,0
+Impenetrable Copse,Site,Exceptional,0,Projectiles can't enter this site from the outside.,0.0,0.0,0,0.0,0,0,0,0,0
+Invasion,Aura,Elite,0,"At the end of your turn, summon a 
+Foot Soldier token to each affected enemy site with no units. Lasts 3 of your turns.",6.0,0.0,0,0.0,0,0,0,0,0
+Iron Man Talus,Artifact,Exceptional,0,Can't be disabled or moved by force.,4.0,3.0,0,0.0,0,0,0,0,0
+Joust!,Magic,Ordinary,0,"An ally targets an enemy they’re adjacent to, then they both take a step to swap places. If they pass each other, they fight.",3.0,0.0,0,0.0,0,0,0,0,0
+Joyous Garde,Site,Unique,0,Only provides mana and threshold while in your back row.,0.0,0.0,0,0.0,0,0,0,0,0
+Just a Rock,Artifact,Ordinary,0,May be cast into the hands of any unit already carrying an artifact to banish that artifact.,1.0,0.0,0,0.0,0,0,0,0,0
+Keening Banshee,Minion,Ordinary,0,May be cast for (0) if an allied Mortal died this turn.,4.0,3.0,0,0.0,0,0,0,0,0
+Kelp Cavern,Site,Elite,0,Genesis → Look at your bottom three spells. Put one on top of your spellbook.,0.0,0.0,0,0.0,0,0,0,0,0
+Kettletop Leprechaun,Minion,Ordinary,0,Deathrite → Draw a site.,2.0,2.0,0,0.0,0,0,0,0,0
+King Arthur,Minion,Unique,0,Players can't control cards owned by other players.,4.0,5.0,0,0.0,0,0,0,0,0
+King's Council,Magic,Elite,0,Draw a card for each Unique ally.,3.0,0.0,0,0.0,0,0,0,0,0
+Kingswood Poachers,Minion,Exceptional,0,"Stealth
+
+Genesis → Search a spellbook for up to three Beasts, banish them, then shuffle.",4.0,3.0,0,0.0,0,0,0,0,0
+Knighthood,Magic,Exceptional,0,"If you control an Ordinary Mortal, you may summon a Knight, Sir, or Dame from your hand to their location.",1.0,0.0,0,0.0,0,0,0,0,0
+Lady Iseult,Minion,Unique,0,"If another nearby allied minion would die, return it to hand.",2.0,1.0,0,0.0,0,0,0,0,0
+Lake Afanc,Minion,Ordinary,0,"Lethal, Submerge",4.0,3.0,0,0.0,0,0,0,0,0
+Lava Flow,Magic,Exceptional,0,Lava flows from the caster's site in a cardinal direction. Deal damage to each other unit occupying a site in the area of effect:,5.0,0.0,0,0.0,0,0,0,0,0
+Led Astray,Magic,Ordinary,0,Choose any number of enemies at target location. They take a step together to another location they're adjacent to.,2.0,0.0,0,0.0,0,0,0,0,0
+Leyline Henge,Site,Ordinary,0,Genesis → Draw a spell for each other adjacent Leyline Henge.,0.0,0.0,0,0.0,0,0,0,0,0
+Lookout,Site,Ordinary,0,Genesis → Look at each opponent's hand.,0.0,0.0,0,0.0,0,0,0,0,0
+Love Potion,Artifact,Elite,0,"Bearer has ""Sacrifice Love Potion → Gain control of target enemy minion here until this unit leaves the realm.""",6.0,0.0,0,0.0,0,0,0,0,0
+Lugbog Cat,Minion,Exceptional,0,Can and must be cast to any water site.,3.0,4.0,0,0.0,0,0,0,0,0
+Lumbering Giant,Minion,Ordinary,0,Can't defend or intercept.,4.0,4.0,0,0.0,0,0,0,0,0
+Magic Missiles,Magic,Ordinary,0,"Shoot three projectiles in the same direction, one at a time. Each deals 1 damage.",2.0,0.0,0,0.0,0,0,0,0,0
+Major City,Site,Elite,0,Elite minions cost (1) less to cast to this site.,0.0,0.0,0,0.0,0,0,0,0,0
+Merlin,Minion,Unique,0,"Spellcaster
+
+Any time during your turn, Merlin may look at your next spell and may cast it if it's a magic spell.",3.0,3.0,0,0.0,0,0,0,0,0
+Merlin's Staff,Artifact,Unique,0,Bearer has Spellcaster and +1 power for each magic spell they've cast this turn while holding Merlin's Staff.,2.0,0.0,0,0.0,0,0,0,0,0
+Merlin's Tower,Site,Unique,0,"(A)(A)(A) – Genesis → This turn, gains Spellcaster and its next magic costs (3) less.",0.0,0.0,0,0.0,0,0,0,0,0
+Mesmerism,Magic,Unique,0,Gain control of target nearby minion.,4.0,0.0,0,0.0,0,0,0,0,0
+Mester Stoor Worm,Minion,Elite,0,"Submerge, Waterbound
+
+Tap → Choose a direction from Mester Stoor Worm. Deal Lethal damage to each unit at a location in the area of effect:",6.0,7.0,0,0.0,0,0,0,0,0
+Monstrous Lion,Minion,Elite,0,"Charge, Can't attack sites",4.0,4.0,0,0.0,0,0,0,0,0
+Morgana le Fay,Minion,Unique,0,"Spellcaster, Stealth
+
+Genesis → Morgana draws her own hand of three spells, which only she can cast.",3.0,3.0,0,0.0,0,0,0,0,0
+Muirid Fomorians,Minion,Exceptional,0,"Burrowing, Submerge",7.0,6.0,0,0.0,0,0,0,0,0
+Nelly Longarms,Minion,Unique,0,"Submerge
+
+Tap → Shoot a projectile. If it hits a unit, drag it here. Nelly may submerge it.",3.0,2.0,0,0.0,0,0,0,0,0
+Ominous Owl,Minion,Ordinary,0,"Airborne
+
+You may cast minions to this site.",1.0,1.0,0,0.0,0,0,0,0,0
+Overbearing Bailiff,Minion,Elite,0,Has +7 power while in your back row and no royalty is nearby.,3.0,0.0,0,0.0,0,0,0,0,0
+Peasant Revolt,Magic,Unique,0,Destroy everything Unique or Elite in the realm.,5.0,0.0,0,0.0,0,0,0,0,0
+Pebbled Paths,Site,Exceptional,0,Minions atop nearby sites lose Charge.,0.0,0.0,0,0.0,0,0,0,0,0
+Pendragon Banner,Artifact,Elite,0,Nearby allies have +1 power while there are no enemies here.,4.0,0.0,0,0.0,0,0,0,0,0
+Pendragon Legacy,Magic,Unique,0,Shuffle any number of Unique cards from your cemetery into your decks. Draw a card.,1.0,0.0,0,0.0,0,0,0,0,0
+Perilous Bridge,Site,Elite,0,Units can’t traverse this site’s top border on the ground.,0.0,0.0,0,0.0,0,0,0,0,0
+Pigs of the Sounder,Minion,Exceptional,0,"Deathrite → Reveal your next five spells, then summon all Grand Old Boars from among them to this site. Put the rest on the bottom in a random order.",3.0,3.0,0,0.0,0,0,0,0,0
+Poisoned Well,Site,Exceptional,0,Genesis → Enemy Avatars lose 1 life for each nearby site they control.,0.0,0.0,0,0.0,0,0,0,0,0
+Pond,Site,Ordinary,0,"Genesis → This turn, the next Beast cast to this site costs (1) less, ignoring threshold.",0.0,0.0,0,0.0,0,0,0,0,0
+Pookas,Minion,Exceptional,0,Deathrite → Each opponent discards a random card.,3.0,2.0,0,0.0,0,0,0,0,0
+Postern Gate,Site,Elite,0,Enters the realm under an opponent's control.,0.0,0.0,0,0.0,0,0,0,0,0
+Power of Flight,Magic,Ordinary,0,Give an allied minion Airborne until your next turn. Draw a spell.,2.0,0.0,0,0.0,0,0,0,0,0
+Purple Knight,Minion,Exceptional,0,Lance,3.0,3.0,0,0.0,0,0,0,0,0
+Queen Guinevere,Minion,Unique,0,"Once on your turn, Queen Guinevere may untap target allied minion.",4.0,1.0,0,0.0,0,0,0,0,0
+Questing Beast,Minion,Unique,0,"Lethal, Stealth
+
+At the end of your turn, Questing Beast may take a step.",5.0,5.0,0,0.0,0,0,0,0,0
+Rebecks,Minion,Unique,0,Nearby allied Giants have Charge.,5.0,4.0,0,0.0,0,0,0,0,0
+Reckless Squire,Minion,Ordinary,0,"Charge, Lance",3.0,1.0,0,0.0,0,0,0,0,0
+Redbreast Robin,Minion,Ordinary,0,"Airborne
+
+At the end of your turn, each other unit here takes 1 damage.",1.0,1.0,0,0.0,0,0,0,0,0
+Redcap Powries,Minion,Exceptional,0,"Charge
+
+If Redcap Powries haven't attacked by the end of your turn, they die.",3.0,3.0,0,0.0,0,0,0,0,0
+Rescue,Magic,Ordinary,0,Return a minion from your cemetery to your hand.,3.0,0.0,0,0.0,0,0,0,0,0
+Rhitta Gawr of Snowdonia,Minion,Unique,0,Other minions can't untap.,6.0,6.0,0,0.0,0,0,0,0,0
+Rhongomyniad,Artifact,Unique,0,"Bearer strikes first and has ""Tap → Throw Rhongomyniad as a piercing projectile. It deals 3 damage to one other unit at each location along its path.”",4.0,0.0,0,0.0,0,0,0,0,0
+Ribble Boggart,Minion,Elite,0,"At the start of your turn, Boggart gains a random mutation until the end of turn: Airborne, Ranged, Lethal, or +3 power.",3.0,3.0,0,0.0,0,0,0,0,0
+Ring of Morrigan,Artifact,Unique,0,"Bearer has ""Whenever this unit casts a spell, they may deal 1 damage to target nearby unit to have you gain 1 life.""",1.0,0.0,0,0.0,0,0,0,0,0
+Salmon of Knowledge,Minion,Elite,0,"Submerge, Waterbound
+
+Other units at this site have ""Tap → Roll a d20. On a 14+, banish Salmon of Knowledge and draw three spells.""",3.0,0.0,0,0.0,0,0,0,0,0
+Saracen Raiders,Minion,Exceptional,0,"Charge 
+
+May be cast to any site without enemies.",4.0,3.0,0,0.0,0,0,0,0,0
+Saracen Scout,Minion,Ordinary,0,May be cast to any site without enemies.,2.0,2.0,0,0.0,0,0,0,0,0
+Seelie Court,Minion,Elite,0,"At the start of your turn, players draw a spell for each Faerie in the realm.",6.0,5.0,0,0.0,0,0,0,0,0
+Shameless Squire,Minion,Ordinary,0,"Lance
+
+Genesis → Tap target nearby enemy. It drops everything it's carrying.",3.0,1.0,0,0.0,0,0,0,0,0
+Shapeshift,Magic,Elite,0,An allied minion tries to transform. Look at your next five spells: you may choose a minion among them to be the new form. Put the rest on the bottom in a random order.,4.0,0.0,0,0.0,0,0,0,0,0
+Shatter Strike,Magic,Exceptional,0,"An ally targets an enemy adjacent to them, destroying an artifact they're carrying and then striking them.",4.0,0.0,0,0.0,0,0,0,0,0
+Shellycoat,Minion,Ordinary,0,"Submerge
+
+Takes 1 less damage.",2.0,2.0,0,0.0,0,0,0,0,0
+Sherwood Huntress,Minion,Ordinary,0,Ranged,2.0,2.0,0,0.0,0,0,0,0,0
+Siege Giant,Minion,Exceptional,0,"Once on your turn, Siege Giant may throw a weaker ally here through the air to a nearby location.",4.0,4.0,0,0.0,0,0,0,0,0
+Sir Agravaine,Minion,Unique,0,"Stealth, Movement +1
+Whenever another ally attacks an enemy adjacent to Sir Agravaine, he strikes that enemy afterwards without losing Stealth.",3.0,3.0,0,0.0,0,0,0,0,0
+Sir Balin,Minion,Unique,0,"Lance
+
+Whenever Sir Balin strikes an Avatar, destroy that Avatar's site then burrow other minions and artifacts there.",4.0,3.0,0,0.0,0,0,0,0,0
+Sir Bedivere,Minion,Unique,0,"If Sir Bedivere is carrying an artifact at the start of your turn, draw a card.",4.0,3.0,0,0.0,0,0,0,0,0
+Sir Bors the Younger,Minion,Unique,0,"Ranged 2
+
+Enemies lose Stealth.",3.0,4.0,0,0.0,0,0,0,0,0
+Sir Gaheris,Minion,Unique,0,"Lance
+
+Untaps at the end of your turn.",4.0,3.0,0,0.0,0,0,0,0,0
+Sir Galahad,Minion,Unique,0,"Sir Galahad's strikes heal you.
+
+Nearby allies take no damage from Demons, Spirits, and Undead.",5.0,3.0,0,0.0,0,0,0,0,0
+Sir Gareth,Minion,Unique,0,(A)(W) — Reveal from hand → Transform an allied Mortal into Sir Gareth.,4.0,3.0,0,0.0,0,0,0,0,0
+Sir Gawain,Minion,Unique,0,"Sir Gawain takes damage for other adjacent allies. If he dies from damage taken this way, draw a card.",4.0,3.0,0,0.0,0,0,0,0,0
+Sir Ironside,Minion,Unique,0,Has +3 power during enemy turns.,4.0,4.0,0,0.0,0,0,0,0,0
+Sir Kay,Minion,Unique,0,"Whenever Sir Kay targets a weaker minion, he untaps.",4.0,4.0,0,0.0,0,0,0,0,0
+Sir Lamorak,Minion,Unique,0,Deathrite → Strike each nearby enemy.,4.0,4.0,0,0.0,0,0,0,0,0
+Sir Lancelot,Minion,Unique,0,"Lance
+
+The first time Sir Lancelot fights each turn, untap him.",6.0,4.0,0,0.0,0,0,0,0,0
+Sir Mordred,Minion,Unique,0,Genesis & Deathrite → Kill target adjacent enemy minion.,6.0,4.0,0,0.0,0,0,0,0,0
+Sir Morien,Minion,Unique,0,"Genesis → Summon two Foot Soldier tokens here.
+
+Enemy projectiles can't enter here.",4.0,3.0,0,0.0,0,0,0,0,0
+Sir Pelleas,Minion,Unique,0,"Submerge
+
+Moves freely between water locations.",3.0,4.0,0,0.0,0,0,0,0,0
+Sir Pellinore,Minion,Unique,0,"Charge, Lance
+
+Whenever Sir Pellinore kills the strongest enemy minion, draw a card.",6.0,5.0,0,0.0,0,0,0,0,0
+Sir Perceval,Minion,Unique,0,"Genesis → An opponent chooses a site.
+
+When Sir Perceval enters that site, draw a card, then reactivate his Genesis ability.",4.0,4.0,0,0.0,0,0,0,0,0
+Sir Priamus,Minion,Unique,0,"Lance, Lethal
+
+Nearby allies are immune to Lethal.",4.0,2.0,0,0.0,0,0,0,0,0
+Sir Tom Thumb,Minion,Unique,0,"May be carried by any Beast.
+
+Deathrite → Return to hand.",2.0,2.0,0,0.0,0,0,0,0,0
+Sir Tristan,Minion,Unique,0,"Once on your turn, Sir Tristan may tap target nearby enemy minion. That enemy doesn't untap the next time it would.",5.0,2.0,0,0.0,0,0,0,0,0
+Sir Yvain,Minion,Unique,0,"Lance. Genesis → Choose an allied Beast.
+
+Sir Yvain and his Beast companion have +2 power while adjacent to each other.",5.0,3.0,0,0.0,0,0,0,0,0
+Sisters of Avalon,Minion,Exceptional,0,"Spellcaster
+
+Genesis → Discard a spell. Draw a spell.",2.0,1.0,0,0.0,0,0,0,0,0
+Sly Fox,Minion,Ordinary,0,Gains Stealth at the end of your turn.,1.0,1.0,0,0.0,0,0,0,0,0
+Snowball,Magic,Exceptional,0,"Shoot a piercing projectile. It picks up all other units along its path and carries them with it. When it stops, units there take damage equal to the number of units in the snowball.",5.0,0.0,0,0.0,0,0,0,0,0
+Spearmarshal,Minion,Elite,0,"Once on your turn, Spearmarshal may acquire a Lance token.",5.0,3.0,0,0.0,0,0,0,0,0
+Squeakers,Minion,Ordinary,0,"Deathrite → Reveal your next five spells, then summon all Pigs of the Sounder from among them to this site. Put the rest on the bottom in a random order.",1.0,1.0,0,0.0,0,0,0,0,0
+Stone Rain,Magic,Exceptional,0,"Target a site up to two steps away. Deal 1 damage to everything atop it, repeating for each site in your hand.",4.0,0.0,0,0.0,0,0,0,0,0
+Sugarplum Pixies,Minion,Exceptional,0,"Airborne
+
+At the end of your turn, untap another nearby ally.",2.0,2.0,0,0.0,0,0,0,0,0
+Swindler Troupe,Minion,Ordinary,0,Genesis → Give another nearby allied minion Stealth.,3.0,3.0,0,0.0,0,0,0,0,0
+Sword and Shield,Artifact,Exceptional,0,Bearer has +2 power.,3.0,0.0,0,0.0,0,0,0,0,0
+Sylvan Splendor,Aura,Elite,0,"Whenever you cast a Beast or Faerie to an affected site, draw a spell. Dispel if an affected site is successfully attacked.",4.0,0.0,0,0.0,0,0,0,0,0
+Tactical Move,Magic,Ordinary,0,"One at a time, each ally takes up to two steps.",2.0,0.0,0,0.0,0,0,0,0,0
+Tax Collector,Minion,Ordinary,0,"Genesis → On your opponent's next turn, their spells cost (1) more.",3.0,2.0,0,0.0,0,0,0,0,0
+Templar,Avatar,Elite,0,"Tap → Play or draw a site.
+
+The first Knight, Sir, or Dame you cast each turn costs (1) less.",0.0,2.0,0,20.0,0,0,0,0,0
+Thankless Squire,Minion,Ordinary,0,"Lance, Lance, Lance, Immobile",5.0,1.0,0,0.0,0,0,0,0,0
+The Black Plague,Aura,Unique,0,"At the end of your turn, the weakest minion occupying affected sites dies. If tied, choose one. Dispel if none die.",4.0,0.0,0,0.0,0,0,0,0,0
+The Faerie Queene,Minion,Unique,0,"Airborne, Spellcaster
+
+Nearby allied Faeries take no damage from units with 4 or more power.",4.0,3.0,0,0.0,0,0,0,0,0
+The Great Drowning of Men,Aura,Unique,0,"At the start of your turn, destroy affected sites and flood the resulting Rubble. Submerge everything atop them and dispel The Great Drowning of Men.",7.0,0.0,0,0.0,0,0,0,0,0
+The Great Famine,Aura,Unique,0,"At the end of your turn, the strongest minion occupying affected sites dies. If tied, choose one. Dispel if none die.",4.0,0.0,0,0.0,0,0,0,0,0
+The Green Knight,Minion,Unique,0,"Whenever an enemy minion can attack The Green Knight, it must.
+
+Deathrite → Strike target nearby enemy.",6.0,3.0,0,0.0,0,0,0,0,0
+The Lady of the Lake,Minion,Unique,0,"Spellcaster, Submerge
+
+Genesis → You may summon a Mortal or artifact from your cemetery to Lady of the Lake's location. If you do, shuffle her into her owner's spellbook.",3.0,3.0,0,0.0,0,0,0,0,0
+The Ninth Legion,Minion,Unique,0,"Voidwalk. Must be cast to a corner.
+
+Deathrite → Return to hand.",6.0,6.0,0,0.0,0,0,0,0,0
+The Round Table,Artifact,Unique,0,"Must be cast to your back row.
+
+Whenever you summon King Arthur, or a Knight, Sir, or Dame to The Round Table, draw a card.",3.0,0.0,0,0.0,0,0,0,0,0
+The Wild Hunt,Minion,Elite,0,"Airborne
+
+Other nearby Spirits and Faeries have Charge.",6.0,5.0,0,0.0,0,0,0,0,0
+Thieving Magpie,Minion,Ordinary,0,"Airborne
+
+May pick up carried artifacts with cost (1) or less.",1.0,1.0,0,0.0,0,0,0,0,0
+Thundering Giant,Minion,Elite,0,"Charge
+
+Once on your turn, Thundering Giant may teleport to another nearby location. Tap all other units there on arrival.",6.0,4.0,0,0.0,0,0,0,0,0
+Tintagel,Site,Unique,0,Only provides mana and threshold while in your back row.,0.0,0.0,0,0.0,0,0,0,0,0
+Tithe,Magic,Unique,0,Draw three sites.,1.0,0.0,0,0.0,0,0,0,0,0
+Tooth Faeries,Minion,Exceptional,0,"Airborne
+
+At the start of your turn, tap target nearby enemy.",2.0,2.0,0,0.0,0,0,0,0,0
+Tournament Grounds,Site,Exceptional,0,"Anyone may cast Knights, Sirs, or Dames to this site and may do so for no threshold.",0.0,0.0,0,0.0,0,0,0,0,0
+Town,Site,Exceptional,0,Exceptional minions cost (1) less to cast to this site.,0.0,0.0,0,0.0,0,0,0,0,0
+Treetop Hideout,Site,Ordinary,0,Genesis → You may give Stealth to a nearby allied minion.,0.0,0.0,0,0.0,0,0,0,0,0
+Troll Bridge,Site,Exceptional,0,"The first time a lone enemy enters here each turn, strike it unless they discard a card.",0.0,3.0,0,0.0,0,0,0,0,0
+Unseelie Court,Minion,Elite,0,"At the start of your turn, players discard a spell for each Faerie in the realm.",6.0,5.0,0,0.0,0,0,0,0,0
+Valley of Delight,Site,Elite,0,"Genesis → Choose one: (A), (E), (F), (W). This site provides that permanently.",0.0,0.0,0,0.0,0,0,0,0,0
+Valor,Magic,Elite,0,May be cast when an ally defends a site or another unit. The ally gains +4 power this turn.,0.0,0.0,0,0.0,0,0,0,0,0
+Vanishment,Magic,Exceptional,0,Give all allied minions Stealth. Draw a spell.,3.0,0.0,0,0.0,0,0,0,0,0
+Varmint Warrens,Site,Elite,0,Beasts here can't be targeted by enemies.,0.0,0.0,0,0.0,0,0,0,0,0
+Vengeful Heir,Minion,Elite,0,"As an additional cost to cast this, you may banish a dead Knight, Sir, or Dame. If you do, Vengeful Heir is summoned as a copy of that minion.",3.0,1.0,0,0.0,0,0,0,0,0
+Verdant Knight,Minion,Exceptional,0,Lance,3.0,3.0,0,0.0,0,0,0,0,0
+Vikings,Minion,Ordinary,0,Tap → Deal 2 damage to each unit at target adjacent location.,5.0,4.0,0,0.0,0,0,0,0,0
+Vivien the Enchantress,Minion,Unique,0,"Vivien has the printed abilities of all Avatars and Spellcasters in the realm, wherever she is.",5.0,1.0,0,0.0,0,0,0,0,0
+Wall of Brambles,Aura,Ordinary,0,"Conjure atop the border of an allied site.
+
+Whenever an enemy traverses this wall 
+on the ground, it takes 2 damage.",2.0,0.0,0,0.0,0,0,0,0,0
+War Horse,Minion,Exceptional,0,"Charge, May carry an ally.",2.0,2.0,0,0.0,0,0,0,0,0
+Wedding Hall,Site,Elite,0,"Provides no mana, but if Arthur and Guinevere start your turn here, you win.",0.0,0.0,0,0.0,0,0,0,0,0
+Weightless Squire,Minion,Ordinary,0,"Airborne, Lance",3.0,1.0,0,0.0,0,0,0,0,0
+Whirlwind,Magic,Exceptional,0,Choose clockwise or counterclockwise. Each unit and artifact atop sites in a two-by-two area is pushed one step in that direction.,2.0,0.0,0,0.0,0,0,0,0,0
+White Hart,Minion,Unique,0,Other minions and locations nearby can't be attacked.,3.0,2.0,0,0.0,0,0,0,0,0
+White Knight,Minion,Exceptional,0,Costs (2) less to cast if you have less life than each opponent.,5.0,3.0,0,0.0,0,0,0,0,0
+Witch,Avatar,Unique,0,"Tap → Play or draw a site.
+
+Tap → Curse target Avatar, choose one: Their spells cost (1) more to cast on their next turn, they lose 2 life, or they have -3 power until your next turn.",0.0,1.0,0,20.0,0,0,0,0,0
+Wizard's Den,Site,Elite,0,Genesis → Draw a spell. Discard a spell when this site is first attacked successfully.,0.0,0.0,0,0.0,0,0,0,0,0
+Wolpertinger,Minion,Elite,0,Has +1 power for each of your dead Beasts.,4.0,0.0,0,0.0,0,0,0,0,0
+Wormelow Tump,Site,Unique,0,(E)(E)(E) – Opponents can't affect cards in your cemetery.,0.0,0.0,0,0.0,0,0,0,0,0
+Wyvern,Minion,Exceptional,0,Airborne,6.0,5.0,0,0.0,0,0,0,0,0
+Year of the Blaze,Aura,Unique,0,"At the start of your turn, destroy affected sites and everything here, including Year of the Blaze.",7.0,0.0,0,0.0,0,0,0,0,0
+Yellow Knight,Minion,Exceptional,0,Lance,3.0,3.0,0,0.0,0,0,0,0,0
