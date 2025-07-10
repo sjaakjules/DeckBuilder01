@@ -15,7 +15,8 @@ Responsibilities:
 	•	Card objects are passed into Rule_Engine for parsing Rule Text into actual abilities.
 '''
 import re
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple, Optional
+import pygame
 from Util_Methods import _save_json
 
 class CardInfo:   
@@ -27,6 +28,8 @@ class CardInfo:
         self.slug = slug
         self.hotscore = hotscore
         self.image_url = self.check_img_url(name, img_url)
+        self.image_surface: Optional[pygame.Surface] = None
+        self.positions: Dict[str, List[Tuple[int, int]]] = {}
 
         self.rareity = rarity
         self.type = type_
@@ -245,6 +248,16 @@ class CardInfo:
             return f"https://card.cards.army/cards/{missing_cards[name]}.webp"
         return img_url
     
+    @staticmethod
+    def print_group(grouped):
+        print(f"[DEBUG] grouped (elements): {len(grouped)}")
+        for element, types in grouped.items():
+            print(f"  Element: {element} ({len(types)} types)")
+            for type_key, rarities in types.items():
+                print(f"    Type: {type_key} ({len(rarities)} rarities)")
+                for rarity, cards in rarities.items():
+                    print(f"      Rarity: {rarity} ({len(cards)} cards)")
+    
     def apply_rules_text_effects(self):
         """
         Parses rulesText and updates flags like isStealthy, isRanged, movement, etc.
@@ -301,6 +314,18 @@ class CardInfo:
                     setattr(self, attr, True)
 
 	
+if __name__ == "__main__":
+    import requests
+    from bs4 import BeautifulSoup
+
+    url = "https://curiosa.io/decks/cm1w6qd2z000e3ej5org973z8"
+    response = requests.get(url)
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    deck_name = soup.title.string.strip()
+
+    print(deck_name)
+ 
 '''
 {
     "sorcery_data": {

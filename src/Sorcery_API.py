@@ -94,7 +94,7 @@ class SorceryAPI:
         
 class CardData:
     def __init__(self):
-        self.cards: List[CardInfo] = []
+        self.cards: Dict[str, CardInfo] = {}
         self.card_data_lookup: Dict[str, Dict[str, Any]] = {}
         self.CardData: List[Dict[str, Any]] = []
 
@@ -126,7 +126,7 @@ class CardData:
         # --- If all datasets align in length, use file ---
         if (len(sorcery_cards) == len(curiosa_cards) == len(self.CardData) == len(self.card_data_lookup)):
             print("✅ Card data files are up to date, loading CardInfo objects...")
-            self.cards = [CardInfo.from_card_data(cd) for cd in self.CardData]
+            self.cards = {cd["name"]: CardInfo.from_card_data(cd) for cd in self.CardData}
         else:
             print("🛠️ Data mismatch or missing files, rebuilding card data with latest API data...")
             self.CardData = self.build_card_data(sorcery_cards, curiosa_cards)
@@ -198,7 +198,7 @@ class CardData:
             }
 
             card = CardInfo.from_card_data(card_data)
-            self.cards.append(card)
+            self.cards[card.name] = card
             
         return card_data_list
 

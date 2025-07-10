@@ -11,6 +11,7 @@ import random
 from queue import Queue, Empty
 import threading
 from Util_Methods import _save_json
+from bs4 import BeautifulSoup
 
 # --- CONFIG ---
 BASE_URL = "https://curiosa.io/api/trpc"
@@ -71,6 +72,17 @@ class CuriosaAPI:
     @staticmethod
     def fetch_curiosa_deck(deck_id: str) -> Optional[Dict[str, Any]]:
         deck_id = CuriosaAPI._extract_deck_id(deck_id)
+        
+        web_url = f"https://curiosa.io/decks/{deck_id}"
+        web_response = requests.get(web_url)
+        if web_response.ok:
+            soup = BeautifulSoup(web_response.text, "html.parser")
+            deck_name = soup.title.string.strip()
+            deck_info = deck_name.split("|")
+        else:
+            print(f"❌ Failed to fetch deck {deck_id}: {web_response.status_code}")
+            return None
+        
         query = {
             str(i): {"json": {"id": deck_id}} for i in range(4)
         }
@@ -83,6 +95,7 @@ class CuriosaAPI:
         )
 
         response = requests.get(url, headers=CuriosaAPI._headerInfo(f"/decks/{deck_id}"))
+        
         if response.ok:
             try:
                 results = response.json()
@@ -91,6 +104,8 @@ class CuriosaAPI:
                     return None
 
                 return {
+                    "name": deck_info[0].strip() or "Unknown",
+                    "author": deck_info[1].strip() or "Unknown",
                     "mainboard": results[0]["result"]["data"]["json"],
                     "avatar": results[1]["result"]["data"]["json"],
                     "sideboard": results[2]["result"]["data"]["json"],
@@ -281,6 +296,7 @@ class CuriosaAPI:
     def fetch_user_cards(self):
         self.collection = self.fetch_collection()
         self.folders: Optional[list[Dict[str, Any]]] = self.fetch_only_folders()
+        print(self.folders)
     
     def find_all_usernames(self, data):
         usernames = []
