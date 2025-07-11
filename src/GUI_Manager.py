@@ -295,10 +295,17 @@ class GUI_Manager:
                             pygame.draw.rect(self.window, (255, 255, 255), rect, 2)
                         else:
                             pygame.draw.rect(self.window, (255, 0, 0), rect, 2)
-                    
-                    # --- Over-committed Outline (orange) ---
-                    if hasattr(card, "name") and self.is_card_over_committed(card.name, pos_group):
-                        pygame.draw.rect(self.window, (255, 165, 0), rect, 4)  # Orange outline for over-committed cards
+                        
+                    if pos_group != "base":
+                        # --- Over-committed Outline (orange) ---
+                        if hasattr(card, "name") and self.is_card_over_committed(card.name, pos_group) == 0:
+                            pygame.draw.rect(self.window, (255, 165, 0), rect, 4)  # Orange outline for over-committed cards
+                            
+                        elif hasattr(card, "name") and self.is_card_over_committed(card.name, pos_group) < 0:
+                            pygame.draw.rect(self.window, (255, 0, 0), rect, 4)  # Red outline for over-committed cards
+                            
+                        elif hasattr(card, "name") and self.is_card_over_committed(card.name, pos_group) > 0:
+                            pygame.draw.rect(self.window, (255, 255, 255), rect, 4)  # White outline for under-committed cards
                 
     def draw_selection_box(self):
         if self.selection_box:
@@ -759,7 +766,7 @@ class GUI_Manager:
         snapped_y = round(y / grid_v) * grid_v
         return snapped_x, snapped_y
 
-    def is_card_over_committed(self, card_name: str, pos_group: str) -> bool:
+    def is_card_over_committed(self, card_name: str, pos_group: str) -> int:
         """Check if a card is over-committed in a mainboard deck (more copies than available in collection)"""
         # Only check mainboard decks
         if not pos_group.endswith("_mainboard"):
@@ -769,12 +776,23 @@ class GUI_Manager:
         if not self.collection_manager.collection:
             return False
         
-        # Count how many copies are in this deck
+        # Extract deck name from position group (format: "DeckName_mainboard")
+        deck_name = pos_group.replace("_mainboard", "")
+        
+        # Find the deck by name
+        target_deck = None
+        for deck in self.deck_manager.decks:
+            if deck.name == deck_name and deck.id in self.placed_decks:
+                target_deck = deck
+                break
+        
+        if not target_deck:
+            return False
+        
+        # Count how many copies are in this deck's mainboard
         deck_copies = 0
-        if card_name in self.card_manager.cards:
-            card = self.card_manager.cards[card_name]
-            if pos_group in card.positions:
-                deck_copies = len(card.positions[pos_group])
+        if card_name in target_deck.deck["mainboard"]:
+            deck_copies = len(target_deck.deck["mainboard"][card_name])
         
         # Count how many copies are available in collection
         collection_copies = 0
@@ -782,7 +800,7 @@ class GUI_Manager:
             collection_copies = self.collection_manager.collection.cards[card_name]["total_quantity"]
         
         # Card is over-committed if deck has more copies than collection
-        return deck_copies > collection_copies
+        return collection_copies - deck_copies
 
     def get_deck_region_at_position(self, world_x: float, world_y: float):
         """Get the deck and board region at the given world position"""
