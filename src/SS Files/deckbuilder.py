@@ -7,7 +7,7 @@ import requests
 import pygame_gui
 from typing import Optional
 from pathlib import Path
-from CardInfo import CardInfo
+from CardInfo import Card
 from Curiosa_User import CuriosaAPI
 from Util_Debug import DebugDisplay
 import Util_Config as config
@@ -260,6 +260,6 @@ class DeckBuilder:
         for card in CuriosaAPI.all_cards:
             variants = card.get("variants", [])
             image_url = variants[0]["src"] if variants and len(variants) > 0 else None
-            cardinfo_list.append(CardInfo(image_url, card))
+            cardinfo_list.append(Card(image_url, card))
         return cardinfo_list
 

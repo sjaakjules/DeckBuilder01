@@ -17,9 +17,9 @@ Responsibilities:
 import re
 from typing import List, Dict, Any, Tuple, Optional
 import pygame
-from Util_Methods import _save_json
+from Util_IO import _save_json
 
-class CardInfo:   
+class Card:   
 
     def __init__(self, name, slug, hotscore, img_url, rarity, type_,
                  subTypes, elements, elements_count, cost, thresholds,
@@ -322,7 +322,7 @@ if __name__ == "__main__":
     response = requests.get(url)
 
     soup = BeautifulSoup(response.text, "html.parser")
-    deck_name = soup.title.string.strip()
+    deck_name = soup.title.string.strip() if soup.title and soup.title.string else "Unknown Deck"
 
     print(deck_name)
  

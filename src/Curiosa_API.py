@@ -10,14 +10,13 @@ from playwright.sync_api import sync_playwright
 import random
 from queue import Queue, Empty
 import threading
-from Util_Methods import _save_json
+from Util_IO import CURIOSA_API, CURIOSA_DATA_PATH, DATA_PATH, _save_json
 from bs4 import BeautifulSoup
-
-# --- CONFIG ---
-BASE_URL = "https://curiosa.io/api/trpc"
-DATA_PATH = "data"
-TMP_PATH = "tmp"
-CARD_DATA_PATH = os.path.join(DATA_PATH, "Curiosa_CardData.json")
+from Util_Debug import DebugDisplay
+import csv
+import Levenshtein
+import pygame
+from tqdm import tqdm
 
 
 class CuriosaAPI:
@@ -77,8 +76,8 @@ class CuriosaAPI:
         web_response = requests.get(web_url)
         if web_response.ok:
             soup = BeautifulSoup(web_response.text, "html.parser")
-            deck_name = soup.title.string.strip()
-            deck_info = deck_name.split("|")
+            deck_name = soup.title.string.strip() if soup.title and soup.title.string else "Unknown Deck"
+            deck_info = deck_name.split("|") if isinstance(deck_name, str) else ["Unknown", "Unknown"]
         else:
             print(f"❌ Failed to fetch deck {deck_id}: {web_response.status_code}")
             return None
@@ -227,7 +226,7 @@ class CuriosaAPI:
                     cls.all_cards.append(card)
                     if len(cls.all_cards) == cls.online_card_count:
                         print("✅ Card list complete. Saving to file.")
-                        _save_json(cls.all_cards, CARD_DATA_PATH)
+                        _save_json(cls.all_cards, CURIOSA_DATA_PATH)
                         break
                     
                 except Empty:
@@ -254,12 +253,12 @@ class CuriosaAPI:
     def check_card_list():
         os.makedirs(DATA_PATH, exist_ok=True)
         
-        if os.path.exists(CARD_DATA_PATH):
-            with open(CARD_DATA_PATH, "r", encoding="utf-8") as f:
+        if os.path.exists(CURIOSA_DATA_PATH):
+            with open(CURIOSA_DATA_PATH, "r", encoding="utf-8") as f:
                 CuriosaAPI.all_cards = json.load(f)
-            print(f"📁 Loaded {len(CuriosaAPI.all_cards)} cards from cache.")
+            print(f"📁 Loaded {len(CuriosaAPI.all_cards)} cards from Curiosa card file.")
         else:
-            print("🆕 No card cache `found.")
+            print("🆕 Curiosa card file not found.")
 
         try:
             CuriosaAPI.online_card_count = CuriosaAPI.fetch_total_card_count()
@@ -269,11 +268,111 @@ class CuriosaAPI:
             return
 
         if len(CuriosaAPI.all_cards) != CuriosaAPI.online_card_count:
-            print("🔄 Card count mismatch. Rebuilding card list...")
+            print("🔄 Card count mismatch. Rebuilding Curiosa card list...")
             CuriosaAPI.rebuild_card_list()
         else:
             print("✅ Local Curiosa card list is up to date.")
             CuriosaAPI.have_loaded_cards = True
+    
+    @staticmethod  # NOT USED
+    def fetch_csv_collection_NOTUSED(path: str, card_data_lookup: Dict[str, Dict[str, Any]], force_update: bool = False):
+        csv_collection: Dict[str, Dict[str, Any]] = {}
+        
+        """Load collection from CSV file with JSON caching"""
+        csv_path = path
+        if not os.path.exists(csv_path):
+            error_msg = f"Collection file not found: {csv_path}"
+            print(error_msg)
+            DebugDisplay.add_message(error_msg)
+            return
+        
+        # Generate JSON cache filename based on CSV filename
+        csv_filename = os.path.basename(csv_path)
+        json_cache_path = f"assets/{csv_filename.replace('.csv', '_cache.json')}"
+        
+        # Try to load from JSON cache first (unless force_update is True)
+        if not force_update and os.path.exists(json_cache_path):
+            try:
+                with open(json_cache_path, 'r', encoding='utf-8') as file:
+                    cached_data = json.load(file)
+                    csv_collection = cached_data['collection']
+                
+                success_msg = f"Loaded {len(csv_collection)} unique cards from cache"
+                print(success_msg)
+                DebugDisplay.add_message(success_msg)
+                return
+            except Exception as e:
+                print(f"Failed to load cache, falling back to CSV: {e}")
+        
+        # Load from CSV and process
+        with open(csv_path, 'r', encoding='utf-8') as file:
+            total_rows = sum(1 for _ in csv.DictReader(file))
+
+        with open(csv_path, 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+
+            with tqdm(total=total_rows, desc="Loading Collection from CSV", unit="cards") as pbar:
+                for row in reader:
+                    collection_card_name = row['card name'].strip()
+                    # normalized_name = self.normalize_card_name(collection_card_name)
+
+                    matched_name = None
+
+                    # Try exact match
+                    if collection_card_name in card_data_lookup:
+                        matched_name = collection_card_name
+                    else:
+                        # Use Levenshtein to find closest name
+                        min_distance = float('inf')
+                        for json_name in card_data_lookup:
+                            dist = Levenshtein.distance(collection_card_name.lower(), json_name.lower())
+                            if dist < min_distance:
+                                min_distance = dist
+                                matched_name = json_name
+
+                        if min_distance > 5:  # You can tune this threshold
+                            print(f"❌ Card not matched: '{collection_card_name}' (closest: '{matched_name}', distance: {min_distance})")
+                            continue
+
+                    if not matched_name:
+                        print(f"❌ Card not found in lookup: '{collection_card_name}'")
+                        continue  # Skip this card if not matched
+
+                    if matched_name not in csv_collection:
+                        csv_collection[matched_name] = {
+                            'count': 0,
+                            'card_data': card_data_lookup[matched_name],
+                            'sets': [],
+                            'finishes': [],
+                            'products': []
+                        }
+
+                    csv_collection[matched_name]['count'] += 1
+                    csv_collection[matched_name]['sets'].append(row['set'])
+                    csv_collection[matched_name]['finishes'].append(row['finish'])
+                    csv_collection[matched_name]['products'].append(row['product'])
+
+                    pbar.update(1)
+                    pbar.set_postfix({'Unique Cards': len(csv_collection)})
+
+        try:
+            cache_data = {
+                'collection': csv_collection,
+                'timestamp': str(pygame.time.get_ticks()),
+                'csv_filename': os.path.basename(csv_path)
+            }
+            _save_json(cache_data, json_cache_path)
+
+        except Exception as e:
+            error_msg = f"Failed to save csv collection cache: {e}"
+            print(error_msg)
+            DebugDisplay.add_message(error_msg)
+
+        success_msg = f"✅ Loaded {len(csv_collection)} unique cards from collection"
+        print(success_msg)
+        DebugDisplay.add_message(success_msg)
+        
+        return csv_collection
     
     def __init__(self):
         self.buildID = self.fetch_build_id()
@@ -295,7 +394,7 @@ class CuriosaAPI:
             
     def fetch_user_cards(self):
         self.collection = self.fetch_collection()
-        self.folders: Optional[list[Dict[str, Any]]] = self.fetch_only_folders()
+        self.folders: Optional[list[Dict[str, Any]]] = self.fetch_deck_folders()
         print(self.folders)
     
     def find_all_usernames(self, data):
@@ -459,7 +558,7 @@ class CuriosaAPI:
             print(response.text)
         return None
 
-    def fetch_only_folders(self) -> Optional[list[Dict[str, Any]]]:
+    def fetch_deck_folders(self) -> Optional[list[Dict[str, Any]]]:
         query = {
             "0": {"json": {"folderId": None}, "meta": {"values": {"folderId": ["undefined"]}}}
         }

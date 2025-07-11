@@ -13,7 +13,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 # Import local modules
-from CardInfo import CardInfo
+from CardInfo import Card
 from Curiosa_Decks import get_curiosa_deck
 from Util_Debug import DebugDisplay
 import Util_Config as config
@@ -296,7 +296,7 @@ class DeckGame:
         # Create CardInfo objects for all cards
         all_cards = []
         for card_name, card_info in self.collection.items():
-            card_info_obj = CardInfo(card_info['image_path'], card_info['card_data'])
+            card_info_obj = Card(card_info['image_path'], card_info['card_data'])
             all_cards.append(card_info_obj)
         
         # Start the nested layout from the center
@@ -570,7 +570,7 @@ class DeckGame:
         
         return None
     
-    def insert_card_at_position(self, card: CardInfo, position: int):
+    def insert_card_at_position(self, card: Card, position: int):
         """Insert card at specific position, shifting others"""
         if position < 0:
             position = 0
@@ -812,7 +812,7 @@ class DeckGame:
             # Track shift key release
             self.shift_held = False
     
-    def draw_card(self, card: CardInfo, pos: Tuple[int, int], size: Tuple[int, int]):
+    def draw_card(self, card: Card, pos: Tuple[int, int], size: Tuple[int, int]):
         """Draw a card at the specified position"""
         # Check if this is a Site card that should be rotated
         is_site = card.type == "Site"
@@ -859,7 +859,7 @@ class DeckGame:
                             (pos[0] + 2, pos[1] + 2, rotated_size[0] - 4, rotated_size[1] - 4))
             self._draw_card_text(card, pos, rotated_size, is_site)
     
-    def draw_card_transparent(self, card: CardInfo, pos: Tuple[int, int], size: Tuple[int, int], alpha: float):
+    def draw_card_transparent(self, card: Card, pos: Tuple[int, int], size: Tuple[int, int], alpha: float):
         """Draw a card with transparency at the specified position"""
         # Check if this is a Site card that should be rotated
         is_site = card.type == "Site"
@@ -918,7 +918,7 @@ class DeckGame:
         # Draw the transparent card surface to the screen
         self.screen.blit(card_surface, pos)
     
-    def _draw_card_text(self, card: CardInfo, pos: Tuple[int, int], size: Tuple[int, int], is_site: bool = False):
+    def _draw_card_text(self, card: Card, pos: Tuple[int, int], size: Tuple[int, int], is_site: bool = False):
         """Draw card text information (fallback when no image)"""
         font = pygame.font.Font(None, 16)
         
@@ -950,7 +950,7 @@ class DeckGame:
             cost_rect = cost_surface.get_rect(center=(center_x, center_y + 40))
             self.screen.blit(cost_surface, cost_rect)
     
-    def _draw_card_text_transparent(self, card: CardInfo, surface: pygame.Surface, size: Tuple[int, int], alpha: float, is_site: bool = False):
+    def _draw_card_text_transparent(self, card: Card, surface: pygame.Surface, size: Tuple[int, int], alpha: float, is_site: bool = False):
         """Draw card text information with transparency (fallback when no image)"""
         font = pygame.font.Font(None, 16)
         
@@ -985,7 +985,7 @@ class DeckGame:
             cost_rect = cost_surface.get_rect(center=(center_x, center_y + 40))
             surface.blit(cost_surface, cost_rect)
     
-    def get_card_display_size(self, card: CardInfo) -> Tuple[int, int]:
+    def get_card_display_size(self, card: Card) -> Tuple[int, int]:
         """Get the display size of a card (accounting for rotation)"""
         base_size = (int(self.card_size[0] * self.zoom), int(self.card_size[1] * self.zoom))
         if card.type == "Site":

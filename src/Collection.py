@@ -74,7 +74,7 @@ class Collection:
             with tqdm(total=total_rows, desc="Loading CSV Collection", unit="cards") as pbar:
                 for row in reader:
                     csv_name = row["card name"].strip()
-                    matched_name = None
+                    matched_name = ""
 
                     if csv_name in card_data_lookup:
                         matched_name = csv_name
