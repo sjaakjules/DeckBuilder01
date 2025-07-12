@@ -11,6 +11,7 @@ import Layout_Manager as LM
 from GUI_Sidebar import Sidebar
 from GUI_Themes import Modern_theme
 from Util_IO import _save_json
+from Deck import Deck
 
 
 class GUI_Manager:
@@ -63,6 +64,12 @@ class GUI_Manager:
         
         # Track placed decks
         self.placed_decks = set()  # Set of deck IDs that have been placed on the grid
+        
+        # Double-click tracking for card duplication
+        self.last_click_time = 0
+        self.last_click_pos = None
+        self.double_click_threshold = 300  # milliseconds
+        self.double_click_distance = 10  # pixels
       
     def draw_grid(self):
         spacing_h = LM.GRID_SPACING[0]  # world units
@@ -350,7 +357,10 @@ class GUI_Manager:
             f"Zoom: {self.zoom:.2f}",
             f"Offset: ({self.offset_x:.0f}, {self.offset_y:.0f})",
             f"Base BBox: {self.base_bounding_box}",
-            f"Placed Decks: {len(self.placed_decks)}"
+            f"Placed Decks: {len(self.placed_decks)}",
+            f"Selected Cards: {len(self.selected_cards)}",
+            "Controls: Double-click=Duplicate, Delete=Remove deck cards",
+            "Save/Load: Layout+Updated Decks"
         ]
         
         # Draw debug info in bottom-right corner with right justification
@@ -410,6 +420,10 @@ class GUI_Manager:
             self.shift_held = mods & pygame.KMOD_SHIFT
             self.alt_held = mods & pygame.KMOD_ALT
             self.ctrl_held = mods & pygame.KMOD_CTRL
+            
+            # Handle delete key for card deletion
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
+                self.delete_selected_cards()
 
         elif event.type == pygame.VIDEORESIZE:
             # Handle window resize
@@ -425,6 +439,19 @@ class GUI_Manager:
             elif event.button == 1:  # Left click
                 mx, my = event.pos
                 clicked_card = False
+                current_time = pygame.time.get_ticks()
+                
+                # Check for double-click
+                is_double_click = False
+                if (self.last_click_pos and 
+                    current_time - self.last_click_time < self.double_click_threshold and
+                    abs(mx - self.last_click_pos[0]) < self.double_click_distance and
+                    abs(my - self.last_click_pos[1]) < self.double_click_distance):
+                    is_double_click = True
+                
+                # Update click tracking
+                self.last_click_time = current_time
+                self.last_click_pos = (mx, my)
 
                 for card in self.card_manager.cards.values():
                     if card.image_surface is None:
@@ -448,6 +475,12 @@ class GUI_Manager:
                             if rect.collidepoint(mx, my):
                                 clicked_card = True
                                 card_name = card.name
+                                
+                                # Handle double-click for card duplication/deletion
+                                if is_double_click:
+                                    self.handle_card_double_click(card_name, pos_group, pos_idx, world_x, world_y)
+                                    return True
+                                
                                 # Don't change selection if clicking an already selected card without modifiers
                                 if (card_name, pos_group, pos_idx) in self.selected_cards:
                                     self.selected_card_index = card_name
@@ -544,9 +577,9 @@ class GUI_Manager:
                     self.selection_box = None
                 self.dragging_card = False
                 
-                # Check if cards were dropped on deck regions or dragged out of regions
-                if self.selected_cards:
-                    self.handle_card_drop_on_deck_regions()
+                # DISABLED: Check if cards were dropped on deck regions or dragged out of regions
+                # if self.selected_cards:
+                #     self.handle_card_drop_on_deck_regions()
                 
                 if not self.selection_box and self.selected_cards:
                     for name, pos_group, pos_idx in self.selected_cards:
@@ -633,7 +666,7 @@ class GUI_Manager:
             self.collection_manager.load_from_csv()
 
     def handle_deck_button_click(self, deck_id):
-        """Handle clicks on deck buttons - place deck on grid"""
+        """Handle clicks on deck buttons - place deck on grid (single deck only)"""
         # Find the deck by ID
         deck = None
         for d in self.deck_manager.decks:
@@ -645,6 +678,11 @@ class GUI_Manager:
             print(f"❌ Deck {deck_id} not found")
             return
         
+        # Clear any existing deck before placing the new one
+        if self.placed_decks:
+            print(f"🗑️ Clearing existing deck before placing '{deck.name}'")
+            self.clear_all_placed_decks()
+        
         # Place the deck on the grid
         self.place_deck_on_grid(deck)
         
@@ -653,6 +691,206 @@ class GUI_Manager:
         
         # Remove the button since deck is now placed
         self.sidebar.remove_deck_button(deck_id)
+
+    def clear_all_placed_decks(self):
+        """Clear all placed decks and their card positions from the grid"""
+        # Store the deck IDs that were placed so we can restore their buttons
+        placed_deck_ids = list(self.placed_decks)
+        
+        # Remove all deck cards from card manager positions
+        for deck in self.deck_manager.decks:
+            if deck.id in self.placed_decks:
+                for board_name, board_data in deck.deck.items():
+                    for card_name, entries in board_data.items():
+                        if card_name not in self.card_manager.cards:
+                            continue
+                        
+                        card = self.card_manager.cards[card_name]
+                        position_group = f"{deck.name}_{board_name}"
+                        
+                        # Remove all positions for this deck
+                        if position_group in card.positions:
+                            del card.positions[position_group]
+        
+        # Clear placed decks set
+        self.placed_decks.clear()
+        
+        # Clear deck bounding boxes
+        self.deck_bounding_boxes.clear()
+        
+        # Restore deck buttons so users can select a different deck
+        for deck_id in placed_deck_ids:
+            deck = None
+            for d in self.deck_manager.decks:
+                if d.id == deck_id:
+                    deck = d
+                    break
+            if deck:
+                self.sidebar.add_deck_button(deck.name, deck.id)
+        
+        print("✅ Cleared all placed decks from the grid")
+
+    def handle_card_double_click(self, card_name: str, pos_group: str, pos_idx: int, world_x: float, world_y: float):
+        """Handle double-click on a card - duplicate if in deck, add to deck if base card, ignore if no deck"""
+        # Check if this card is in a deck
+        deck_name = None
+        board_name = None
+        
+        # Extract deck name from position group (format: "DeckName_boardname")
+        if "_" in pos_group:
+            parts = pos_group.split("_", 1)
+            if len(parts) == 2:
+                deck_name = parts[0]
+                board_name = parts[1]
+        
+        if deck_name and board_name:
+            # Card is in a deck - duplicate it
+            self.duplicate_card_in_deck(card_name, deck_name, board_name, world_x, world_y)
+        elif pos_group == "base":
+            # Base card - add to deck if one is loaded, otherwise do nothing
+            if self.placed_decks:
+                self.add_base_card_to_deck(card_name, world_x, world_y)
+            else:
+                print("ℹ️ No deck loaded - base card double-click ignored")
+        else:
+            # Card is not in a deck and not a base card - do nothing
+            print("ℹ️ Double-click ignored for non-deck, non-base card")
+
+    def duplicate_card_in_deck(self, card_name: str, deck_name: str, board_name: str, world_x: float, world_y: float):
+        """Duplicate a card within a deck by adding a new position offset by grid spacing"""
+        # Find the deck
+        target_deck = None
+        for deck in self.deck_manager.decks:
+            if deck.name == deck_name and deck.id in self.placed_decks:
+                target_deck = deck
+                break
+        
+        if not target_deck:
+            print(f"❌ Deck '{deck_name}' not found or not placed")
+            return
+        
+        # Calculate new position offset by grid spacing
+        import Layout_Manager as LM
+        grid_spacing_x, grid_spacing_y = LM.GRID_SPACING
+        new_x = int(world_x + grid_spacing_x)
+        new_y = int(world_y + grid_spacing_y)
+        
+        # Add the card to the deck at the new position
+        print(f"➕ Duplicating {card_name} in {deck_name} - {board_name} at ({new_x}, {new_y})")
+        target_deck.add_card(board_name, card_name, (new_x, new_y))
+        
+        # Add to card manager positions
+        card = self.card_manager.cards[card_name]
+        position_group = f"{deck_name}_{board_name}"
+        if position_group not in card.positions:
+            card.positions[position_group] = []
+        card.positions[position_group].append((new_x, new_y))
+        
+        print(f"✅ Duplicated {card_name} in {deck_name} - {board_name}")
+
+    def add_base_card_to_deck(self, card_name: str, world_x: float, world_y: float):
+        """Add a base card to the currently loaded deck with position offset by grid spacing"""
+        # Get the currently loaded deck (should be only one)
+        if not self.placed_decks:
+            print("❌ No deck loaded")
+            return
+        
+        # Get the first (and only) placed deck
+        deck_id = list(self.placed_decks)[0]
+        target_deck = None
+        for deck in self.deck_manager.decks:
+            if deck.id == deck_id:
+                target_deck = deck
+                break
+        
+        if not target_deck:
+            print("❌ Placed deck not found")
+            return
+        
+        # Calculate new position offset by grid spacing
+        import Layout_Manager as LM
+        grid_spacing_x, grid_spacing_y = LM.GRID_SPACING
+        new_x = int(world_x + grid_spacing_x)
+        new_y = int(world_y + grid_spacing_y)
+        
+        # Add the card to the deck's mainboard at the new position
+        print(f"➕ Adding base card {card_name} to {target_deck.name} - mainboard at ({new_x}, {new_y})")
+        target_deck.add_card("mainboard", card_name, (new_x, new_y))
+        
+        # Add to card manager positions
+        card = self.card_manager.cards[card_name]
+        position_group = f"{target_deck.name}_mainboard"
+        if position_group not in card.positions:
+            card.positions[position_group] = []
+        card.positions[position_group].append((new_x, new_y))
+        
+        print(f"✅ Added base card {card_name} to {target_deck.name} - mainboard")
+
+    def delete_selected_cards(self):
+        """Delete all selected cards from their respective deck locations only"""
+        if not self.selected_cards:
+            print("ℹ️ No cards selected for deletion")
+            return
+        
+        print(f"🗑️ Deleting {len(self.selected_cards)} selected cards from decks")
+        
+        # Process each selected card for deletion
+        for card_name, pos_group, pos_idx in self.selected_cards:
+            if card_name not in self.card_manager.cards:
+                continue
+            
+            # Check if this card is in a deck
+            deck_name = None
+            board_name = None
+            
+            # Extract deck name from position group (format: "DeckName_boardname")
+            if "_" in pos_group:
+                parts = pos_group.split("_", 1)
+                if len(parts) == 2:
+                    deck_name = parts[0]
+                    board_name = parts[1]
+            
+            if deck_name and board_name:
+                # Card is in a deck - remove it from the deck
+                self.delete_card_from_deck(card_name, deck_name, board_name, pos_idx)
+            else:
+                # Card is not in a deck (base card or other) - cannot be deleted
+                print(f"ℹ️ Cannot delete {card_name} - not in a deck")
+        
+        # Clear selection after deletion
+        self.selected_cards = []
+        print("✅ Card deletion completed")
+
+    def delete_card_from_deck(self, card_name: str, deck_name: str, board_name: str, pos_idx: int):
+        """Delete a card from a deck by removing its position"""
+        # Find the deck
+        target_deck = None
+        for deck in self.deck_manager.decks:
+            if deck.name == deck_name and deck.id in self.placed_decks:
+                target_deck = deck
+                break
+        
+        if not target_deck:
+            print(f"❌ Deck '{deck_name}' not found or not placed")
+            return
+        
+        # Get the card's position
+        card = self.card_manager.cards[card_name]
+        position_group = f"{deck_name}_{board_name}"
+        if position_group not in card.positions or pos_idx >= len(card.positions[position_group]):
+            print("❌ Card position not found")
+            return
+        
+        position = card.positions[position_group][pos_idx]
+        
+        # Remove from deck
+        print(f"🗑️ Deleting {card_name} from {deck_name} - {board_name} at {position}")
+        target_deck.remove_card(board_name, card_name, position)
+        
+        # Remove from card manager positions
+        del card.positions[position_group][pos_idx]
+        
+        print(f"✅ Deleted {card_name} from {deck_name} - {board_name}")
 
     def place_deck_on_grid(self, deck):
         """Place a deck on the game grid with proper positioning"""
@@ -669,29 +907,14 @@ class GUI_Manager:
         print(f"✅ Placed deck '{deck.name}' at position {position}")
 
     def calculate_deck_position(self, deck):
-        """Calculate where to place a new deck starting at (0, 2035) and placing to the right"""
+        """Calculate where to place a deck - always at the same position since only one deck is shown at a time"""
         import Layout_Manager as LM
         
-        # Start position for first deck
+        # Always place at the same position since we only show one deck at a time
         start_x = 0
         start_y = 2035
         
-        if not self.placed_decks:
-            # First deck - place at start position
-            return (start_x, start_y)
-        
-        # Get the number of placed decks to calculate position
-        # Each deck region is 2475 pixels wide (MAINBOARD_WIDTH)
-        # We want decks to be placed with minimal spacing between them
-        deck_width = Deck_Manager.MAINBOARD_WIDTH  # MAINBOARD_WIDTH from Deck_Manager
-        deck_spacing = 0  # Use minimal spacing between decks (one grid unit)
-        
-        # Calculate position based on number of placed decks
-        num_placed = len(self.placed_decks)
-        new_x = start_x + (num_placed * (deck_width + deck_spacing))
-        new_y = start_y  # All decks at same Y level
-        
-        return (new_x, new_y)
+        return (start_x, start_y)
 
     def add_deck_to_card_manager(self, deck):
         """Add deck cards to the card manager's position tracking"""
@@ -736,28 +959,185 @@ class GUI_Manager:
 
     def save_layout(self, filepath):
         try:
-            # Only save card positions, not the full card objects
-            layout_data = {name: card.positions for name, card in self.card_manager.cards.items()}
+            # Create layout data structure
+            layout_data = {
+                "card_positions": {name: card.positions for name, card in self.card_manager.cards.items()},
+                "metadata": {
+                    "version": "1.0",
+                    "timestamp": str(pygame.time.get_ticks()),
+                    "has_updated_decks": len(self.placed_decks) > 0
+                }
+            }
+            
+            # Save layout file
             with open(filepath, "w", encoding="utf-8") as f:
-                json.dump(layout_data, f)
+                json.dump(layout_data, f, indent=2)
             print(f"✅ Layout saved to {filepath}")
+            
+            # Save updated decks to separate files
+            self.save_updated_decks()
+            
         except Exception as e:
             print(f"❌ Failed to save layout: {e}")
+
+    def save_updated_decks(self):
+        """Save all placed decks to separate JSON files with '_updated' suffix"""
+        if not self.placed_decks:
+            print("ℹ️ No decks to save")
+            return
+        
+        saved_count = 0
+        for deck in self.deck_manager.decks:
+            if deck.id in self.placed_decks:
+                try:
+                    # Create filename with _updated suffix
+                    safe_filename = "".join(c for c in deck.name if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                    safe_filename = safe_filename.replace(' ', '_')
+                    updated_filename = f"{safe_filename}_updated.json"
+                    
+                    # Convert deck to JSON format
+                    deck_data = {
+                        "name": deck.name,
+                        "author": deck.author,
+                        "id": deck.id,
+                        "mainboard": [],
+                        "sideboard": [],
+                        "maybeboard": [],
+                        "avatar": []
+                    }
+                    
+                    # Convert deck structure to JSON format
+                    for board_name in ["mainboard", "sideboard", "maybeboard", "avatar"]:
+                        if board_name in deck.deck:
+                            for card_name, entries in deck.deck[board_name].items():
+                                for entry in entries:
+                                    card_entry = {
+                                        "card": {"name": card_name},
+                                        "quantity": 1,
+                                        "variant": {
+                                            "setCard": {
+                                                "set": {"name": entry.get("set_name", "Unknown")},
+                                                "meta": {"category": entry.get("kind", "Unknown")}
+                                            },
+                                            "finish": entry.get("finish", "Unknown"),
+                                            "product": entry.get("product", "Unknown")
+                                        },
+                                        "position": entry["position"]
+                                    }
+                                    deck_data[board_name].append(card_entry)
+                    
+                    # Save to file
+                    from Util_IO import DECK_PATH
+                    deck_filepath = os.path.join(DECK_PATH, updated_filename)
+                    with open(deck_filepath, "w", encoding="utf-8") as f:
+                        json.dump(deck_data, f, indent=2)
+                    
+                    print(f"✅ Saved updated deck: {updated_filename}")
+                    saved_count += 1
+                    
+                except Exception as e:
+                    print(f"❌ Failed to save updated deck {deck.name}: {e}")
+        
+        print(f"✅ Saved {saved_count} updated deck(s)")
 
     def load_layout(self, filepath):
         try:
             if not os.path.exists(filepath):
                 print(f"⚠️ Layout file not found: {filepath}")
                 return
+            
             with open(filepath, "r", encoding="utf-8") as f:
                 layout_data = json.load(f)
+            
+            # Handle both old and new format
+            if "card_positions" in layout_data:
+                # New format with metadata
+                card_positions = layout_data["card_positions"]
+                metadata = layout_data.get("metadata", {})
+                has_updated_decks = metadata.get("has_updated_decks", False)
+                
+                # Load updated decks if flag is set
+                if has_updated_decks:
+                    print("🔄 Loading updated decks...")
+                    self.load_updated_decks()
+            else:
+                # Old format - just card positions
+                card_positions = layout_data
+                has_updated_decks = False
+            
             # Restore positions to the correct CardInfo objects by name
-            for name, positions in layout_data.items():
+            for name, positions in card_positions.items():
                 if name in self.card_manager.cards:
                     self.card_manager.cards[name].positions = positions
+            
             print(f"✅ Layout loaded from {filepath}")
+            if has_updated_decks:
+                print("✅ Updated decks loaded")
+            
         except Exception as e:
             print(f"❌ Failed to load layout: {e}")
+
+    def load_updated_decks(self):
+        """Load updated deck files and replace existing decks"""
+        from Util_IO import DECK_PATH
+        
+        if not os.path.exists(DECK_PATH):
+            print("⚠️ Deck directory not found")
+            return
+        
+        # Find all _updated.json files
+        updated_files = []
+        for filename in os.listdir(DECK_PATH):
+            if filename.endswith("_updated.json"):
+                updated_files.append(filename)
+        
+        if not updated_files:
+            print("ℹ️ No updated deck files found")
+            return
+        
+        print(f"📁 Found {len(updated_files)} updated deck file(s)")
+        
+        # Clear existing placed decks
+        self.clear_all_placed_decks()
+        
+        # Load each updated deck
+        for filename in updated_files:
+            try:
+                filepath = os.path.join(DECK_PATH, filename)
+                with open(filepath, "r", encoding="utf-8") as f:
+                    deck_data = json.load(f)
+                
+                # Extract deck info
+                deck_name = deck_data.get("name", "Unknown")
+                deck_author = deck_data.get("author", "Unknown")
+                deck_id = deck_data.get("id", "unknown")
+                
+                # Create deck object
+                deck = Deck.from_json(name=deck_name, author=deck_author, id=deck_id, json_data=deck_data)
+                
+                # Add to deck manager if not already present
+                deck_exists = False
+                for existing_deck in self.deck_manager.decks:
+                    if existing_deck.id == deck_id:
+                        # Replace existing deck
+                        existing_deck.deck = deck.deck
+                        deck = existing_deck
+                        deck_exists = True
+                        break
+                
+                if not deck_exists:
+                    self.deck_manager.decks.append(deck)
+                
+                # Place the deck on the grid
+                self.place_deck_on_grid(deck)
+                self.placed_decks.add(deck_id)
+                
+                print(f"✅ Loaded updated deck: {deck_name}")
+                
+            except Exception as e:
+                print(f"❌ Failed to load updated deck {filename}: {e}")
+        
+        print(f"✅ Loaded {len(updated_files)} updated deck(s)")
 
     def snap_card_to_grid(self, x, y, card):
         """Snap a card to the appropriate grid based on its type"""
@@ -854,163 +1234,171 @@ class GUI_Manager:
         return None, None
 
     def handle_card_drop_on_deck_regions(self):
-        """Handle dropping cards on deck regions to add/remove them from decks"""
-        if not self.selected_cards:
-            return
+        """Handle dropping cards on deck regions to add/remove them from decks - DISABLED"""
+        # DISABLED: Drag-to-add/remove functionality has been disabled
+        # This method is kept for reference but is no longer called
+        pass
         
-        # Get the current mouse position in world coordinates
-        mouse_pos = pygame.mouse.get_pos()
-        world_x = (mouse_pos[0] - self.offset_x) / self.zoom
-        world_y = (mouse_pos[1] - self.offset_y) / self.zoom
+        # if not self.selected_cards:
+        #     return
         
-        # Check if we're dropping on a deck region
-        target_deck, target_board = self.get_deck_region_at_position(world_x, world_y)
+        # # Get the current mouse position in world coordinates
+        # mouse_pos = pygame.mouse.get_pos()
+        # world_x = (mouse_pos[0] - self.offset_x) / self.zoom
+        # world_y = (mouse_pos[1] - self.offset_y) / self.zoom
         
-        # If not dropping on a deck region, check if we need to remove cards from decks
-        if not target_deck or not target_board:
-            self.handle_cards_dropped_outside_deck_regions()
-            return
+        # # Check if we're dropping on a deck region
+        # target_deck, target_board = self.get_deck_region_at_position(world_x, world_y)
         
-        print(f"🎯 Dropping cards on {target_deck.name} - {target_board}")
-        print(f"📊 Cards in {target_board} before: {len(target_deck.deck[target_board])} unique cards")
+        # # If not dropping on a deck region, check if we need to remove cards from decks
+        # if not target_deck or not target_board:
+        #     self.handle_cards_dropped_outside_deck_regions()
+        #     return
         
-        # Store original positions to restore them after adding cards
-        original_positions = {}
-        for card_name, pos_group, pos_idx in self.selected_cards:
-            if card_name not in self.card_manager.cards:
-                continue
-            card = self.card_manager.cards[card_name]
-            if pos_group in card.positions and pos_idx < len(card.positions[pos_group]):
-                original_positions[(card_name, pos_group, pos_idx)] = card.positions[pos_group][pos_idx]
+        # print(f"🎯 Dropping cards on {target_deck.name} - {target_board}")
+        # print(f"📊 Cards in {target_board} before: {len(target_deck.deck[target_board])} unique cards")
         
-        # Process each selected card
-        for card_name, pos_group, pos_idx in self.selected_cards:
-            if card_name not in self.card_manager.cards:
-                continue
+        # # Store original positions to restore them after adding cards
+        # original_positions = {}
+        # for card_name, pos_group, pos_idx in self.selected_cards:
+        #     if card_name not in self.card_manager.cards:
+        #         continue
+        #     card = self.card_manager.cards[card_name]
+        #     if pos_group in card.positions and pos_idx < len(card.positions[pos_group]):
+        #         original_positions[(card_name, pos_group, pos_idx)] = card.positions[pos_group][pos_idx]
+        
+        # # Process each selected card
+        # for card_name, pos_group, pos_idx in self.selected_cards:
+        #     if card_name not in self.card_manager.cards:
+        #         continue
             
-            card = self.card_manager.cards[card_name]
-            if pos_group not in card.positions or pos_idx >= len(card.positions[pos_group]):
-                continue
+        #     card = self.card_manager.cards[card_name]
+        #     if pos_group not in card.positions or pos_idx >= len(card.positions[pos_group]):
+        #         continue
             
-            # Check if card is already in this deck and determine source board
-            card_already_in_deck = False
-            source_board = None
-            if card_name in target_deck.deck[target_board]:
-                for entry in target_deck.deck[target_board][card_name]:
-                    if entry["position"] == card.positions[pos_group][pos_idx]:
-                        card_already_in_deck = True
-                        break
+        #     # Check if card is already in this deck and determine source board
+        #     card_already_in_deck = False
+        #     source_board = None
+        #     if card_name in target_deck.deck[target_board]:
+        #         for entry in target_deck.deck[target_board][card_name]:
+        #             if entry["position"] == card.positions[pos_group][pos_idx]:
+        #                 card_already_in_deck = True
+        #                 break
             
-            # Check if card is in a different board of the same deck
-            if not card_already_in_deck:
-                for board_name in ["mainboard", "sideboard", "maybeboard"]:
-                    if board_name != target_board and card_name in target_deck.deck[board_name]:
-                        for entry in target_deck.deck[board_name][card_name]:
-                            if entry["position"] == card.positions[pos_group][pos_idx]:
-                                source_board = board_name
-                                break
-                        if source_board:
-                            break
+        #     # Check if card is in a different board of the same deck
+        #     if not card_already_in_deck:
+        #         for board_name in ["mainboard", "sideboard", "maybeboard"]:
+        #             if board_name != target_board and card_name in target_deck.deck[board_name]:
+        #                 for entry in deck.deck[board_name][card_name]:
+        #                     if entry["position"] == card.positions[pos_group][pos_idx]:
+        #                         source_board = board_name
+        #                         break
+        #                 if source_board:
+        #                     break
             
-            if card_already_in_deck:
-                # Remove card from deck
-                print(f"🗑️ Removing {card_name} from {target_deck.name} - {target_board}")
-                target_deck.remove_card(target_board, card_name, card.positions[pos_group][pos_idx])
+        #     if card_already_in_deck:
+        #         # Remove card from deck
+        #         print(f"🗑️ Removing {card_name} from {target_deck.name} - {target_board}")
+        #         target_deck.remove_card(target_board, card_name, card.positions[pos_group][pos_idx])
                 
-                # Remove from card manager positions
-                deck_pos_group = f"{target_deck.name}_{target_board}"
-                if deck_pos_group in card.positions:
-                    # Find and remove the matching position
-                    for i, pos in enumerate(card.positions[deck_pos_group]):
-                        if pos == card.positions[pos_group][pos_idx]:
-                            del card.positions[deck_pos_group][i]
-                            break
-            elif source_board:
-                # Move card between boards of the same deck
-                print(f"🔄 Moving {card_name} from {target_deck.name} - {source_board} to {target_board}")
-                target_deck.move_card(source_board, target_board, card_name, card.positions[pos_group][pos_idx])
+        #         # Remove from card manager positions
+        #         deck_pos_group = f"{target_deck.name}_{target_board}"
+        #         if deck_pos_group in card.positions:
+        #             # Find and remove the matching position
+        #             for i, pos in enumerate(card.positions[deck_pos_group]):
+        #                 if pos == card.positions[pos_group][pos_idx]:
+        #                     del card.positions[deck_pos_group][i]
+        #                     break
+        #     elif source_board:
+        #         # Move card between boards of the same deck
+        #         print(f"🔄 Moving {card_name} from {target_deck.name} - {source_board} to {target_board}")
+        #         target_deck.move_card(source_board, target_board, card_name, card.positions[pos_group][pos_idx])
                 
-                # Update card manager positions
-                old_deck_pos_group = f"{target_deck.name}_{source_board}"
-                new_deck_pos_group = f"{target_deck.name}_{target_board}"
+        #         # Update card manager positions
+        #         old_deck_pos_group = f"{target_deck.name}_{source_board}"
+        #         new_deck_pos_group = f"{target_deck.name}_{target_board}"
                 
-                # Remove from old board positions
-                if old_deck_pos_group in card.positions:
-                    for i, pos in enumerate(card.positions[old_deck_pos_group]):
-                        if pos == card.positions[pos_group][pos_idx]:
-                            del card.positions[old_deck_pos_group][i]
-                            break
+        #         # Remove from old board positions
+        #         if old_deck_pos_group in card.positions:
+        #             for i, pos in enumerate(card.positions[old_deck_pos_group]):
+        #                 if pos == card.positions[pos_group][pos_idx]:
+        #                     del card.positions[old_deck_pos_group][i]
+        #                     break
                 
-                # Add to new board positions
-                if new_deck_pos_group not in card.positions:
-                    card.positions[new_deck_pos_group] = []
-                card.positions[new_deck_pos_group].append(card.positions[pos_group][pos_idx])
+        #         # Add to new board positions
+        #         if new_deck_pos_group not in card.positions:
+        #             card.positions[new_deck_pos_group] = []
+        #         card.positions[new_deck_pos_group].append(card.positions[pos_group][pos_idx])
                 
-                # For moves within the deck, keep the card at the drop location
-                # (don't return to original position since we're moving it)
-                print(f"✅ {card_name} moved to {target_board} at drop location")
-            else:
-                # Add card to deck (only if card exists in card manager)
-                if card_name in self.card_manager.cards:
-                    print(f"➕ Adding {card_name} to {target_deck.name} - {target_board}")
-                    target_deck.add_card(target_board, card_name, card.positions[pos_group][pos_idx])
+        #         # For moves within the deck, keep the card at the drop location
+        #         # (don't return to original position since we're moving it)
+        #         print(f"✅ {card_name} moved to {target_board} at drop location")
+        #     else:
+        #         # Add card to deck (only if card exists in card manager)
+        #         if card_name in self.card_manager.cards:
+        #             print(f"➕ Adding {card_name} to {target_deck.name} - {target_board}")
+        #             target_deck.add_card(target_board, card_name, card.positions[pos_group][pos_idx])
                     
-                    # Add to card manager positions
-                    deck_pos_group = f"{target_deck.name}_{target_board}"
-                    if deck_pos_group not in card.positions:
-                        card.positions[deck_pos_group] = []
-                    card.positions[deck_pos_group].append(card.positions[pos_group][pos_idx])
+        #             # Add to card manager positions
+        #             deck_pos_group = f"{target_deck.name}_{target_board}"
+        #             if deck_pos_group not in card.positions:
+        #                 card.positions[deck_pos_group] = []
+        #             card.positions[deck_pos_group].append(card.positions[pos_group][pos_idx])
                     
-                    # Return the dragged card to its original position
-                    original_pos = original_positions.get((card_name, pos_group, pos_idx))
-                    if original_pos:
-                        card.positions[pos_group][pos_idx] = original_pos
-                        print(f"🔄 Returning {card_name} to original position {original_pos}")
-                else:
-                    print(f"⚠️ Cannot add {card_name} to deck - card not found in card manager")
+        #             # Return the dragged card to its original position
+        #             original_pos = original_positions.get((card_name, pos_group, pos_idx))
+        #             if original_pos:
+        #                 card.positions[pos_group][pos_idx] = original_pos
+        #                 print(f"🔄 Returning {card_name} to original position {original_pos}")
+        #         else:
+        #             print(f"⚠️ Cannot add {card_name} to deck - card not found in card manager")
         
-        print(f"📊 Cards in {target_board} after: {len(target_deck.deck[target_board])} unique cards")
+        # print(f"📊 Cards in {target_board} after: {len(target_deck.deck[target_board])} unique cards")
 
     def handle_cards_dropped_outside_deck_regions(self):
-        """Handle cards that were dropped outside of deck regions - remove them from decks"""
-        if not self.selected_cards:
-            return
+        """Handle cards that were dropped outside of deck regions - remove them from decks - DISABLED"""
+        # DISABLED: Drag-to-remove functionality has been disabled
+        # This method is kept for reference but is no longer called
+        pass
         
-        print("🚪 Cards dropped outside deck regions - checking for removal")
+        # if not self.selected_cards:
+        #     return
         
-        # Check each selected card to see if it was originally from a deck
-        for card_name, pos_group, pos_idx in self.selected_cards:
-            if card_name not in self.card_manager.cards:
-                continue
+        # print("🚪 Cards dropped outside deck regions - checking for removal")
+        
+        # # Check each selected card to see if it was originally from a deck
+        # for card_name, pos_group, pos_idx in self.selected_cards:
+        #     if card_name not in self.card_manager.cards:
+        #         continue
             
-            card = self.card_manager.cards[card_name]
-            if pos_group not in card.positions or pos_idx >= len(card.positions[pos_group]):
-                continue
+        #     card = self.card_manager.cards[card_name]
+        #     if pos_group not in card.positions or pos_idx >= len(card.positions[pos_group]):
+        #         continue
             
-            # Check if this card is in any deck
-            for deck in self.deck_manager.decks:
-                if deck.id not in self.placed_decks:
-                    continue
+        #     # Check if this card is in any deck
+        #     for deck in self.deck_manager.decks:
+        #         if deck.id not in self.placed_decks:
+        #             continue
                 
-                for board_name in ["mainboard", "sideboard", "maybeboard"]:
-                    if card_name in deck.deck[board_name]:
-                        for entry in deck.deck[board_name][card_name]:
-                            if entry["position"] == card.positions[pos_group][pos_idx]:
-                                # Found the card in a deck - remove it
-                                print(f"🗑️ Removing {card_name} from {deck.name} - {board_name} (dragged outside)")
-                                deck.remove_card(board_name, card_name, card.positions[pos_group][pos_idx])
+        #         for board_name in ["mainboard", "sideboard", "maybeboard"]:
+        #             if card_name in deck.deck[board_name]:
+        #                 for entry in deck.deck[board_name][card_name]:
+        #                     if entry["position"] == card.positions[pos_group][pos_idx]:
+        #                         # Found the card in a deck - remove it
+        #                         print(f"🗑️ Removing {card_name} from {deck.name} - {board_name} (dragged outside)")
+        #                         deck.remove_card(board_name, card_name, card.positions[pos_group][pos_idx])
                                 
-                                # Remove from card manager positions
-                                deck_pos_group = f"{deck.name}_{board_name}"
-                                if deck_pos_group in card.positions:
-                                    for i, pos in enumerate(card.positions[deck_pos_group]):
-                                        if pos == card.positions[pos_group][pos_idx]:
-                                            del card.positions[deck_pos_group][i]
-                                            break
-                                break
-                        else:
-                            continue
-                        break
+        #                         # Remove from card manager positions
+        #                         deck_pos_group = f"{deck.name}_{board_name}"
+        #                         if deck_pos_group in card.positions:
+        #                             for i, pos in enumerate(card.positions[deck_pos_group]):
+        #                                 if pos == card.positions[pos_group][pos_idx]:
+        #                                     del card.positions[deck_pos_group][i]
+        #                                     break
+        #                         break
+        #                 else:
+        #                     continue
+        #                 break
 
     def draw_card_preview(self):
         """Draw a large preview of the card being hovered over in the top right corner"""
