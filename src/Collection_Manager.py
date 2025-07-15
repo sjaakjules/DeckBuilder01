@@ -64,3 +64,4 @@ class Collection_Manager:
             print(f"❌ Login to Curiosa failed: {e}")
     
         self.card_manager.loading = False
+        

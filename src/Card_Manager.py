@@ -23,7 +23,6 @@ class Card_Manager:
         self.loading = True
         self.cards: Dict[str, Card] = {}
         self.card_data_lookup: Dict[str, Dict[str, Any]] = {}
-        Base_CardData: List[Dict[str, Any]] = []
         self.cards_loaded = 0
 
         # Wait until API data is loaded
@@ -153,11 +152,11 @@ class Card_Manager:
                     img_data = response.content
                     with open(filename, "wb") as f:
                         f.write(img_data)
-
+                
                 img = Image.open(BytesIO(img_data)).convert("RGBA")
-                pygame_img = pygame.image.frombuffer(img.tobytes(), img.size, 'RGBA')
-                card.image_surface = pygame_img
-                card.positions = {"base": [((self.cards_loaded % 25) * LM.SPACING[0], (self.cards_loaded // 25) * LM.SPACING[1])]}
+                card.set_scaled_surfaces(img)
+                card.position = ((self.cards_loaded % 25) * LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO,
+                                 (self.cards_loaded // 25) * LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO)
                 self.cards_loaded += 1
             except Exception as e:
                 print(f"Error loading card {getattr(card, 'name', 'unknown')}: {e}")
@@ -168,44 +167,42 @@ class Card_Manager:
 
     def initialize_card_positions(self):
         # --- Automatically group and layout all base cards when loaded ---
-        print("[DEBUG] All cards loaded. Grouping and laying out base cards.")
-        self.group_element_type_rarity(self.cards, "base", (0, 0))
+        Cards_list = list(self.cards.values())
+        self.group_element_type_rarity(Cards_list, (0, 0))
         print("[DEBUG] Base cards grouped and laid out.")
         # Compute and store base bounding box (300 units larger)
         self.base_bounding_box = self.compute_bounding_box(
-            [card for card in self.cards.values() if "base" in card.positions and card.positions["base"]],
-            "base",
-            extra_padding=LM.REGION_PADDING
+            cards=Cards_list,
+            padding=LM.REGION_PADDING * LM.GRID_SPACING
         )
         # Compute and store element bounding boxes for base cards
         self.base_element_bounding_boxes = {}
         element_map = {"Air": [], "Fire": [], "Earth": [], "Water": [], "None": [], "Multiple": []}
         for card in self.cards.values():
-            if "base" in card.positions and card.positions["base"]:
-                if not card.elements:
-                    element_map["None"].append(card)
-                elif len(card.elements) > 1:
-                    element_map["Multiple"].append(card)
-                else:
-                    element_map[card.elements[0]].append(card)
+            if not card.elements:
+                element_map["None"].append(card)
+            elif len(card.elements) > 1:
+                element_map["Multiple"].append(card)
+            else:
+                element_map[card.elements[0]].append(card)
         for element, cards in element_map.items():
-            self.base_element_bounding_boxes[element] = self.compute_bounding_box(cards, "base", extra_padding=int(LM.REGION_PADDING / 2))
+            self.base_element_bounding_boxes[element] = self.compute_bounding_box(Cards_list, padding=int(LM.GRID_SPACING))
             
-    def group_element_type_rarity(self, cards: Dict[str, Card], group_name: str, top_left: Tuple[int, int]):
+    def group_element_type_rarity(self, cards: List[Card], top_left: Tuple[int, int]):
         # Filter cards that have the group_name in their positions
-        filtered_cards = [card for card in cards.values() if group_name in card.positions and card.positions[group_name]]
+        # filtered_cards = [card for card in cards.values() if group_name in card.positions and card.positions[group_name]]
         # Group by element, type, rarity
         grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
-        for card in filtered_cards:
+        for card in cards:
             element_key = "None" if not card.elements else ("Multiple" if len(card.elements) > 1 else card.elements[0])
             type_key = "Spell" if (card.type or "Unknown") in ["Aura", "Magic"] else (card.type or "Unknown")
             rarity_key = card.rareity or "Ordinary"
             grouped[element_key][type_key][rarity_key].append(card)
         # Layout with tighter spacing
-        card_width = LM.SPACING[0]  # Normal card width + 10 padding
-        card_height = LM.SPACING[1]  # Normal card height + 10 padding
-        spacing_element = LM.BOARD_PADDING  # Spacing between element groups
-        spacing_type = LM.SMALL_PADDING  # Spacing between type groups
+        card_width = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # Normal card width + 10 padding
+        card_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # Normal card height + 10 padding
+        spacing_element = LM.BOARD_PADDING * LM.GRID_SPACING  # Spacing between element groups
+        spacing_type = LM.SMALL_PADDING * LM.GRID_SPACING  # Spacing between type groups
         spacing_rarity = 0  # Spacing between rarity rows
         x_offset = 0
         rarity_order_list = ["Ordinary", "Exceptional", "Elite", "Unique"]
@@ -247,22 +244,19 @@ class Card_Manager:
                         # Determine card spacing based on whether it's a site
                         is_site = getattr(card, "type", "").lower() == "site"
                         if is_site:
-                            # Use adaptive spacing for sites to prevent overlap
-                            site_grid_h, site_grid_v = self.get_adaptive_grid_spacing(card)
-                            x = type_start_x + col * site_grid_h * 3 + top_left[0]
-                            y = rarity_y_offset + row * site_grid_v * 3 + top_left[1]
-                        else:
-                            x = type_start_x + col * card_width + top_left[0]
-                            y = rarity_y_offset + row * card_height + top_left[1]
+                            # Site rotated so we need to swap width and height
+                            tmp = card_height
+                            card_height = card_width
+                            card_width = tmp
+                        x = type_start_x + col * card_width + top_left[0]
+                        y = rarity_y_offset + row * card_height + top_left[1]
                         
-                        card.positions[group_name] = [(x, y)]
+                        card.position = (x, y)
                     
                     # Move down by the max height of this rarity band
                     max_rows = max_rows_per_rarity[rarity_key]
                     if max_rows > 0:
-                        # Use adaptive spacing for row height calculation
-                        _, max_grid_v = self.get_adaptive_grid_spacing(card)  # Use any card for reference
-                        row_height = max(card_height, max_grid_v)
+                        row_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO
                         rarity_y_offset += max_rows * row_height + spacing_rarity
                 
                 local_x += col_width + spacing_type
@@ -270,19 +264,19 @@ class Card_Manager:
             
             x_offset += element_max_width + spacing_element
 
-    def group_type_rarity(self, cards: Dict[str, Card], group_name: str, top_left: Tuple[int, int]):
+    def group_type_rarity(self, cards: List[Card], top_left: Tuple[int, int]):
         # Filter cards that have the group_name in their positions
-        filtered_cards = [card for card in cards.values() if group_name in card.positions and card.positions[group_name]]
+        # filtered_cards = [card for card in cards.values() if group_name in card.positions and card.positions[group_name]]
         # Group by type, rarity
         grouped = defaultdict(lambda: defaultdict(list))
-        for card in filtered_cards:
+        for card in cards:
             type_key = "Spell" if (card.type or "Unknown") in ["Aura", "Magic"] else (card.type or "Unknown")
             rarity_key = card.rareity or "Ordinary"
             grouped[type_key][rarity_key].append(card)
         # Layout with tighter spacing
-        card_width = LM.SPACING[0]  # Normal card width + 10 padding
-        card_height = LM.SPACING[1]  # Normal card height + 10 padding
-        spacing_type = LM.SMALL_PADDING  # Spacing between type groups
+        card_width = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # Normal card width + 10 padding
+        card_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # Normal card height + 10 padding
+        spacing_type = LM.GRID_SPACING * LM.SMALL_PADDING  # Spacing between type groups
         spacing_rarity = 0  # Spacing between rarity rows
         x_offset = 0
         rarity_order_list = ["Ordinary", "Exceptional", "Elite", "Unique"]
@@ -317,46 +311,34 @@ class Card_Manager:
                     # Determine card spacing based on whether it's a site
                     is_site = getattr(card, "type", "").lower() == "site"
                     if is_site:
-                        # Use adaptive spacing for sites to prevent overlap
-                        site_grid_h, site_grid_v = self.get_adaptive_grid_spacing(card)
-                        x = type_start_x + col * site_grid_h * 2 + top_left[0]
-                        y = rarity_y_offset + row * site_grid_v * 2 + top_left[1]
-                    else:
-                        x = type_start_x + col * card_width + top_left[0]
-                        y = rarity_y_offset + row * card_height + top_left[1]
+                        # Site rotated so we need to swap width and height
+                        tmp = card_height
+                        card_height = card_width
+                        card_width = tmp
+                    x = type_start_x + col * card_width + top_left[0]
+                    y = rarity_y_offset + row * card_height + top_left[1]
                     
-                    card.positions[group_name] = [(x, y)]
+                    card.position = (x, y)
                 
                 # Move down by the max height of this rarity band
                 max_rows = max_rows_per_rarity[rarity_key]
                 if max_rows > 0:
-                    # Use adaptive spacing for row height calculation
-                    _, max_grid_v = self.get_adaptive_grid_spacing(card)  # Use any card for reference
-                    row_height = max(card_height, max_grid_v)
+                    row_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO
                     rarity_y_offset += max_rows * row_height + spacing_rarity
             
             x_offset += col_width + spacing_type
 
-    def compute_bounding_box(self, cards, group, extra_padding=0):
+    def compute_bounding_box(self, cards: List[Card], padding: int = 0):
         # Returns (min_x, min_y, max_x, max_y) with padding
-        padding = 40 + extra_padding
+        padding = padding
         xs, ys = [], []
         for card in cards:
-            for pos in card.positions.get(group, []):
-                xs.append(pos[0])
-                ys.append(pos[1])
-        if not xs or not ys:
+            (xPos, yPos) = card.position
+            xs.append(xPos)
+            ys.append(yPos)
+        if xs == -1 or not ys == -1:
             return None
         min_x, max_x = min(xs) - padding, max(xs) + LM.CARD_DIMENSIONS[0] + padding
         min_y, max_y = min(ys) - padding, max(ys) + LM.CARD_DIMENSIONS[1] + padding
         return (min_x, min_y, max_x, max_y)
     
-    @staticmethod
-    def get_adaptive_grid_spacing(card: Card):
-        """Get appropriate grid spacing based on card type"""
-        is_site = getattr(card, "type", "").lower() == "site"
-        if is_site:
-            # Sites need more horizontal space due to rotation
-            return LM.GRID_SPACING[0], LM.GRID_SPACING[0]
-        else:
-            return LM.SITE_GRID_SPACING[1], LM.SITE_GRID_SPACING[1]

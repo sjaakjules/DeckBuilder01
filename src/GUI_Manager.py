@@ -4,7 +4,7 @@ import pygame
 import pygame_gui
 from Card_Manager import Card_Manager
 import json
-from typing import List, Dict, Tuple, Mapping
+from typing import List, Dict, Tuple, Mapping, Optional
 from Deck_Manager import Deck_Manager
 from Collection_Manager import Collection_Manager
 import Layout_Manager as LM
@@ -12,6 +12,8 @@ from GUI_Sidebar import Sidebar
 from GUI_Themes import Modern_theme
 from Util_IO import _save_json
 from Deck import Deck
+from Card import Card
+import time
 
 
 class GUI_Manager:
@@ -41,22 +43,31 @@ class GUI_Manager:
         self.is_panning = False
         self.last_mouse_pos = None
         self.spinner_angle = 0
+        self.viewport_rect = [-1, 1, -1, 1]
+        self.cull_rect = [-1, 1, -1, 1]
 
         self.grid_offset = (0, 0)  # offset in world units (not pixels)
 
+        self.visible_cards = {}
         self.selected_card_index = None
-        self.selected_position_group = None
-        self.selected_position_index = None
+        self.selected_deck = None
+        self.selected_board = None
+        self.selected_entry_index = None
         self.dragging_card = False
         self.drag_offset = (0, 0)
         
         self.selection_box = None  # (start_x, start_y, end_x, end_y)
-        self.selected_cards: List[Tuple[str, str, int]] = []   # List of (card_name, pos_group, pos_idx) tuples
+        # Updated selection structure: List of (card_name, deck_id, board_name, entry_index, position) tuples
+        # For base cards: (card_name, None, None, None, position)
+        # For deck cards: (card_name, deck_id, board_name, entry_index, position)
+        self.selected_cards: List[Tuple[str, Optional[str], Optional[str], Optional[int], Tuple[int, int]]] = []
+        self.original_positions = {}  # Track original positions when dragging starts
+        self.drag_anchor_card = None  # Track which card was clicked for dragging
         self.shift_held = False
         self.alt_held = False
         self.ctrl_held = False
         self.fullscreen = False
-        self.show_regions = True  # Toggle for showing bounding boxes
+        self.show_regions = False  # Toggle for showing bounding boxes
         
         self.base_bounding_box: Tuple[int, int, int, int] | None = None  # (min_x, min_y, max_x, max_y)
         self.deck_bounding_boxes = {}  # deck_name: (min_x, min_y, max_x, max_y)
@@ -72,8 +83,8 @@ class GUI_Manager:
         self.double_click_distance = 10  # pixels
       
     def draw_grid(self):
-        spacing_h = LM.GRID_SPACING[0]  # world units
-        spacing_v = LM.GRID_SPACING[0]  # world units
+        spacing_h = LM.GRID_SPACING  # world units
+        spacing_v = LM.GRID_SPACING  # world units
         color = self.grid_color
 
         # Grid offset in world space
@@ -99,7 +110,7 @@ class GUI_Manager:
             sy = y * self.zoom + self.offset_y
             pygame.draw.line(self.window, color, (0, sy), (self.WIDTH, sy))
 
-    def draw_bounding_boxes(self, surface):
+    def draw_bounding_boxes(self, surface: pygame.Surface):
         # Draw base bounding box (300 units larger)
         if self.base_bounding_box:
             min_x, min_y, max_x, max_y = self.base_bounding_box
@@ -147,7 +158,6 @@ class GUI_Manager:
     
     def draw_deck_regions(self, surface):
         """Draw the specific deck regions (mainboard, sideboard, maybeboard) for placed decks"""
-        import Layout_Manager as LM
         
         # Get board region dimensions from Deck_Manager
         board_regions = self.deck_manager.get_board_regions()
@@ -260,60 +270,165 @@ class GUI_Manager:
             maybeboard_text_rect.centerx = maybeboard_rect.centerx
             maybeboard_text_rect.top = maybeboard_rect.top + label_y_offset
             self.window.blit(maybeboard_text_surface, maybeboard_text_rect)
+    
+    def update_culling(self):
+        # Calculate visible world area
+        self.viewport_rect = [-self.offset_x / self.zoom, (self.WIDTH - self.offset_x) / self.zoom,
+                              -self.offset_y / self.zoom, (self.HEIGHT - self.offset_y) / self.zoom]
 
+        padding = 200 / self.zoom  # Convert padding to world units
+        self.cull_rect = [self.viewport_rect[0] - padding, self.viewport_rect[1] + padding, 
+                          self.viewport_rect[2] - padding, self.viewport_rect[3] + padding]
+
+        # Prepare output
+        self.visible_cards = []  # Use list for fast iteration
+
+        in_view = self.check_in_viewport  # Local ref for speed
+        cards = self.card_manager.cards
+
+        # --- Base layer cards (single position) ---
+        for card in cards.values():
+            if in_view(card.position):
+                self.visible_cards.append({
+                    "card": card,
+                    "Position": card.position,
+                    "group": "base",
+                    "idx": -1,
+                    "deck_id": None
+                })
+
+        # --- Deck cards (multi-position entries) ---
+        for deck in self.deck_manager.decks:
+            if deck.id not in self.placed_decks:
+                continue
+
+            for board_name, board_data in deck.deck.items():
+                for card_name, entries in board_data.items():
+                    card = cards.get(card_name)
+                    if card is None:
+                        continue
+
+                    for entry_index, entry in enumerate(entries):
+                        pos = entry["position"]
+                        if in_view(pos):
+                            self.visible_cards.append({
+                                "card": card,
+                                "Position": pos,
+                                "group": board_name,
+                                "idx": entry_index,
+                                "deck_id": deck.id
+                            })
+                                               
+    def check_in_viewport(self, position: Tuple[float, float]):
+        return (position[0] > self.cull_rect[0] and position[0] < self.cull_rect[1] and
+                position[1] > self.cull_rect[2] and position[1] < self.cull_rect[3])
+        
     def draw_cards(self):
+        timings = {}
+        t_start = time.perf_counter()
+
+        # --- 1. Draw Regions (bounding boxes + deck regions) ---
+        t0 = time.perf_counter()
         if self.show_regions:
             self.draw_bounding_boxes(self.window)
-        # Always draw deck regions when decks are placed
         self.draw_deck_regions(self.window)
-        for card in self.card_manager.cards.values():
-            if card.image_surface is None:
+        timings['regions'] = (time.perf_counter() - t0) * 1000
+
+        # --- 2. Draw all visible cards (base and deck cards) ---
+        t0 = time.perf_counter()
+        for visible_card in self.visible_cards:
+            card = visible_card["card"]
+            position = visible_card["Position"]
+            group = visible_card["group"]
+            idx = visible_card["idx"]
+            deck_id = visible_card["deck_id"]
+            
+            if card.image_thumbs is None or len(card.image_thumbs) != len(card.thumb_levels):
                 continue
-            for pos_group, positions in card.positions.items():
-                for position in positions:
-                    world_x, world_y = position
-                    screen_x = world_x * self.zoom + self.offset_x
-                    screen_y = world_y * self.zoom + self.offset_y
-                    
-                    is_site = getattr(card, "type", "").lower() == "site"
 
-                    # Base dimensions
-                    scaled_w = int(LM.CARD_DIMENSIONS[0] * self.zoom)
-                    scaled_h = int(LM.CARD_DIMENSIONS[1] * self.zoom)
+            rect = self.draw_card_image(card, position)
+            if rect is None:
+                continue
+            
+            # --- 2.2 Selection Outline (yellow) ---
+            t_sel = time.perf_counter()
+            
+            # Check if this card is selected - use deck_id from visible_cards
+            # For base cards, board_name should be None, not "base"
+            board_name_for_selection = None if group == "base" else group
+            is_selected = self._is_card_selected(card.name, deck_id, board_name_for_selection, idx)
+            
+            if is_selected:
+                pygame.draw.rect(self.window, (255, 255, 0), rect, 3)
+            timings.setdefault('outline_selection', 0)
+            timings['outline_selection'] += (time.perf_counter() - t_sel) * 1000
 
-                    # Prepare and transform card image
-                    scaled_surface = pygame.transform.smoothscale(card.image_surface, (scaled_w, scaled_h))
+            # --- 2.3 Ownership Outline (white/red) ---
+            t_own = time.perf_counter()
+            if hasattr(card, "name") and self.collection_manager.collection:
+                if card.name in self.collection_manager.collection.cards:
+                    pygame.draw.rect(self.window, (255, 255, 255), rect, 2)
+                else:
+                    pygame.draw.rect(self.window, (255, 0, 0), rect, 2)
+            timings.setdefault('outline_ownership', 0)
+            timings['outline_ownership'] += (time.perf_counter() - t_own) * 1000
 
-                    if is_site:
-                        rotated_surface = pygame.transform.rotate(scaled_surface, -90)  # clockwise
-                        rect = rotated_surface.get_rect(center=(screen_x, screen_y))
-                        self.window.blit(rotated_surface, rect.topleft)
-                    else:
-                        rect = scaled_surface.get_rect(center=(screen_x, screen_y))
-                        self.window.blit(scaled_surface, rect.topleft)
+            # --- 2.4 Over-committed Outline (orange/red/white) ---
+            t_commit = time.perf_counter()
+            '''if pos_group != "base":
+                if hasattr(card, "name"):
+                    over = self.is_card_over_committed(card.name, pos_group)
+                    if over == 0:
+                        pygame.draw.rect(self.window, (255, 165, 0), rect, 4)
+                    elif over < 0:
+                        pygame.draw.rect(self.window, (255, 0, 0), rect, 4)
+                    elif over > 0:
+                        pygame.draw.rect(self.window, (255, 255, 255), rect, 4)'''
+            timings.setdefault('outline_commit', 0)
+            timings['outline_commit'] += (time.perf_counter() - t_commit) * 1000
 
-                    # --- Selection Outline (yellow) ---
-                    if (card.name, pos_group, positions.index(position)) in self.selected_cards:
-                        pygame.draw.rect(self.window, (255, 255, 0), rect, 3)
+        timings['total'] = (time.perf_counter() - t0) * 1000
+        timings['full'] = (time.perf_counter() - t_start) * 1000
+        return timings
 
-                    # --- Ownership Outline (white/red) ---
-                    if hasattr(card, "name") and self.collection_manager.collection:
-                        if card.name in self.collection_manager.collection.cards:
-                            pygame.draw.rect(self.window, (255, 255, 255), rect, 2)
-                        else:
-                            pygame.draw.rect(self.window, (255, 0, 0), rect, 2)
-                        
-                    if pos_group != "base":
-                        # --- Over-committed Outline (orange) ---
-                        if hasattr(card, "name") and self.is_card_over_committed(card.name, pos_group) == 0:
-                            pygame.draw.rect(self.window, (255, 165, 0), rect, 4)  # Orange outline for over-committed cards
-                            
-                        elif hasattr(card, "name") and self.is_card_over_committed(card.name, pos_group) < 0:
-                            pygame.draw.rect(self.window, (255, 0, 0), rect, 4)  # Red outline for over-committed cards
-                            
-                        elif hasattr(card, "name") and self.is_card_over_committed(card.name, pos_group) > 0:
-                            pygame.draw.rect(self.window, (255, 255, 255), rect, 4)  # White outline for under-committed cards
-                
+    def draw_card_image(self, card: Card, position: Tuple[float, float] | None = None):
+        # Early culling: check if card is completely outside viewport
+        if position is None:
+            world_x, world_y = card.position
+        else:
+            world_x, world_y = position
+        if (world_x < self.cull_rect[0] or world_x > self.cull_rect[1] or 
+            world_y < self.cull_rect[2] or world_y > self.cull_rect[3]):
+            return
+
+        # Check if card has valid image data
+        if card.image_thumbs is None or len(card.image_thumbs) == 0:
+            return None
+
+        screen_x = world_x * self.zoom + self.offset_x
+        screen_y = world_y * self.zoom + self.offset_y
+        is_site = getattr(card, "type", "").lower() == "site"
+        
+        # --- 1. Select best thumbnail level (not too small)
+        best_index = 0
+        scale_factor = LM.CARD_PIXEL_DIMENSIONS[0] / LM.CARD_DIMENSIONS[0]
+        for i, thumb_scale in enumerate(card.thumb_levels):
+            if thumb_scale <= self.zoom * scale_factor:
+                best_index = i
+        base_surface = card.image_thumbs[best_index]
+        
+        target_width = int(LM.CARD_DIMENSIONS[0] * self.zoom)
+        target_height = int(LM.CARD_DIMENSIONS[1] * self.zoom)
+        card_surface = pygame.transform.smoothscale(base_surface, (target_width, target_height))
+        
+        if is_site:
+            card_surface = pygame.transform.rotate(card_surface, -90)
+        
+        rect = card_surface.get_rect(center=(screen_x, screen_y))
+        self.window.blit(card_surface, rect.topleft)
+        
+        return rect
+    
     def draw_selection_box(self):
         if self.selection_box:
             x0, y0, x1, y1 = self.selection_box
@@ -337,20 +452,16 @@ class GUI_Manager:
         text_rect = text_surface.get_rect(center=center)
         self.window.blit(text_surface, text_rect)
     
-    def draw_debug_info(self):
-        """Draw debug information including mouse grid position"""
+    def draw_debug_info(self, frame_times=None, fps=None):
+        """Draw debug info including timings and FPS."""
         mouse_pos = pygame.mouse.get_pos()
-        
-        # Convert screen coordinates to world coordinates
         world_x = (mouse_pos[0] - self.offset_x) / self.zoom
         world_y = (mouse_pos[1] - self.offset_y) / self.zoom
+        grid_x = round(world_x / LM.GRID_SPACING) * LM.GRID_SPACING
+        grid_y = round(world_y / LM.GRID_SPACING) * LM.GRID_SPACING
         
-        # Snap to grid
-        grid_x = round(world_x / LM.GRID_SPACING[0]) * LM.GRID_SPACING[0]
-        grid_y = round(world_y / LM.GRID_SPACING[1]) * LM.GRID_SPACING[1]
-        
-        # Create debug text
         debug_lines = [
+            f"FPS: {fps if fps is not None else '?'}",
             f"Mouse Screen: ({mouse_pos[0]}, {mouse_pos[1]})",
             f"Mouse World: ({world_x:.1f}, {world_y:.1f})",
             f"Mouse Grid: ({grid_x}, {grid_y})",
@@ -362,16 +473,18 @@ class GUI_Manager:
             "Controls: Double-click=Duplicate, Delete=Remove deck cards",
             "Save/Load: Layout+Updated Decks"
         ]
-        
-        # Draw debug info in bottom-right corner with right justification
+        if frame_times is not None:
+            debug_lines.append("=== Timings (ms) ===")
+            for k, v in frame_times.items():
+                debug_lines.append(f"{k}: {v:.2f}")
+
+        # Draw debug info in bottom-right, right justified
         line_height = 25
         total_height = len(debug_lines) * line_height
-        start_y = self.HEIGHT - total_height - 10  # 10 pixels from bottom
-        
+        start_y = self.HEIGHT - total_height - 10
         for i, line in enumerate(debug_lines):
             text_surface = self.font.render(line, True, (255, 255, 255))
-            # Right justify by positioning text at screen width minus text width
-            x_pos = self.WIDTH - text_surface.get_width() - 10  # 10 pixels from right edge
+            x_pos = self.WIDTH - text_surface.get_width() - 10
             y_pos = start_y + i * line_height
             self.window.blit(text_surface, (x_pos, y_pos))
     
@@ -453,76 +566,58 @@ class GUI_Manager:
                 self.last_click_time = current_time
                 self.last_click_pos = (mx, my)
 
-                for card in self.card_manager.cards.values():
-                    if card.image_surface is None:
-                        continue
-                    # Check all position groups for hit detection
-                    for pos_group, positions in card.positions.items():
-                        if not positions:
-                            continue
-                        for pos_idx, (world_x, world_y) in enumerate(positions):
-                            screen_x = world_x * self.zoom + self.offset_x
-                            screen_y = world_y * self.zoom + self.offset_y
-                            scaled_w = int(LM.CARD_DIMENSIONS[0] * self.zoom)
-                            scaled_h = int(LM.CARD_DIMENSIONS[1] * self.zoom)
+                # Check visible cards for clicks (much more efficient)
+                for visible_card in self.visible_cards:
+                    card = visible_card["card"]
+                    position = visible_card["Position"]
+                    group = visible_card["group"]
+                    idx = visible_card["idx"]
+                    
+                    # Calculate card bounds
+                    screen_x = position[0] * self.zoom + self.offset_x
+                    screen_y = position[1] * self.zoom + self.offset_y
+                    scaled_w = int(LM.CARD_DIMENSIONS[0] * self.zoom)
+                    scaled_h = int(LM.CARD_DIMENSIONS[1] * self.zoom)
 
-                            # Adjust for rotated Site cards
-                            is_site = getattr(card, "type", "").lower() == "site"
-                            if is_site:
-                                scaled_w, scaled_h = scaled_h, scaled_w
+                    # Adjust for rotated Site cards
+                    is_site = getattr(card, "type", "").lower() == "site"
+                    if is_site:
+                        scaled_w, scaled_h = scaled_h, scaled_w
 
-                            rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
-                            if rect.collidepoint(mx, my):
-                                clicked_card = True
-                                card_name = card.name
-                                
-                                # Handle double-click for card duplication/deletion
-                                if is_double_click:
-                                    self.handle_card_double_click(card_name, pos_group, pos_idx, world_x, world_y)
-                                    return True
-                                
-                                # Don't change selection if clicking an already selected card without modifiers
-                                if (card_name, pos_group, pos_idx) in self.selected_cards:
-                                    self.selected_card_index = card_name
-                                    self.selected_position_group = pos_group
-                                    self.selected_position_index = pos_idx
-                                    self.dragging_card = True
-                                    self.drag_offset = (
-                                        (mx - screen_x) / self.zoom,
-                                        (my - screen_y) / self.zoom
-                                    )
-                                    break
-                                # Alt removes from selection
-                                if self.alt_held:
-                                    if (card_name, pos_group, pos_idx) in self.selected_cards:
-                                        self.selected_cards.remove((card_name, pos_group, pos_idx))
-                                    break
-                                # Shift adds to selection
-                                if self.shift_held:
-                                    self.selected_cards.append((card_name, pos_group, pos_idx))
-                                    self.selected_card_index = card_name
-                                    self.selected_position_group = pos_group
-                                    self.selected_position_index = pos_idx
-                                    self.dragging_card = True
-                                    self.drag_offset = (
-                                        (mx - screen_x) / self.zoom,
-                                        (my - screen_y) / self.zoom
-                                    )
-                                    break
-                                # Default behavior: select this card only
-                                self.selected_cards = [(card_name, pos_group, pos_idx)]
-                                self.selected_card_index = card_name
-                                self.selected_position_group = pos_group
-                                self.selected_position_index = pos_idx
-                                self.dragging_card = True
-                                self.drag_offset = (
-                                    (mx - screen_x) / self.zoom,
-                                    (my - screen_y) / self.zoom
-                                )
-                                break
-                        if clicked_card:
-                            break
-                    if clicked_card:
+                    rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
+                    if rect.collidepoint(mx, my):
+                        clicked_card = True
+                        
+                        # Handle double-click for card duplication/deletion
+                        if is_double_click:
+                            if group == "base":
+                                self.handle_card_double_click(card.name, position[0], position[1])
+                            else:
+                                # Find deck info for deck cards
+                                for deck in self.deck_manager.decks:
+                                    if deck.id in self.placed_decks and group in deck.deck and card.name in deck.deck[group]:
+                                        self.handle_card_double_click(card.name, position[0], position[1], deck.id, group, idx)
+                                        break
+                            return True
+                        
+                        # Create selection tuple - use actual data source positions
+                        if group == "base":
+                            # For base cards, use the position from card_manager
+                            actual_position = self.card_manager.cards[card.name].position
+                            selection_tuple = (card.name, None, None, None, actual_position)
+                        else:
+                            # For deck cards, find the deck and use the actual position from deck entry
+                            for deck in self.deck_manager.decks:
+                                if deck.id in self.placed_decks and group in deck.deck and card.name in deck.deck[group]:
+                                    if idx < len(deck.deck[group][card.name]):
+                                        actual_position = deck.deck[group][card.name][idx]["position"]
+                                        selection_tuple = (card.name, deck.id, group, idx, actual_position)
+                                        break
+                            else:
+                                continue  # Skip if deck not found
+                        
+                        # Handle selection logic
+                        self.handle_card_selection(selection_tuple, mx, my, screen_x, screen_y)
                         break
 
                 if not clicked_card:
@@ -530,8 +625,9 @@ class GUI_Manager:
                     if not self.shift_held and not self.alt_held:
                         self.selected_cards = []
                     self.selected_card_index = None
-                    self.selected_position_group = None
-                    self.selected_position_index = None
+                    self.selected_deck = None
+                    self.selected_board = None
+                    self.selected_entry_index = None
                     self.selection_box = (mx, my, mx, my)
 
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -543,58 +639,78 @@ class GUI_Manager:
                     box = pygame.Rect(min(x0, x1), min(y0, y1), abs(x1 - x0), abs(y1 - y0))
                     affected = []
 
-                    for card in self.card_manager.cards.values():
-                        if card.image_surface is None:
-                            continue
-                        # Check all position groups for selection box
-                        for pos_group, positions in card.positions.items():
-                            if not positions:
-                                continue
-                            for pos_idx, (world_x, world_y) in enumerate(positions):
-                                screen_x = world_x * self.zoom + self.offset_x
-                                screen_y = world_y * self.zoom + self.offset_y
-                                scaled_w = int(LM.CARD_DIMENSIONS[0] * self.zoom)
-                                scaled_h = int(LM.CARD_DIMENSIONS[1] * self.zoom)
-                                # Check for rotated sites
-                                is_site = getattr(card, "type", "").lower() == "site"
-                                if is_site:
-                                    scaled_w, scaled_h = scaled_h, scaled_w
-                                rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
-                                if box.colliderect(rect):
-                                    affected.append((card.name, pos_group, pos_idx))
+                    # Check visible cards in selection box (much more efficient)
+                    for visible_card in self.visible_cards:
+                        card = visible_card["card"]
+                        position = visible_card["Position"]
+                        group = visible_card["group"]
+                        idx = visible_card["idx"]
+                        
+                        # Calculate card bounds
+                        screen_x = position[0] * self.zoom + self.offset_x
+                        screen_y = position[1] * self.zoom + self.offset_y
+                        scaled_w = int(LM.CARD_DIMENSIONS[0] * self.zoom)
+                        scaled_h = int(LM.CARD_DIMENSIONS[1] * self.zoom)
+
+                        # Adjust for rotated Site cards
+                        is_site = getattr(card, "type", "").lower() == "site"
+                        if is_site:
+                            scaled_w, scaled_h = scaled_h, scaled_w
+
+                        rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
+                        if box.colliderect(rect):
+                            # Create selection tuple - use actual data source positions
+                            if group == "base":
+                                # For base cards, use the position from card_manager
+                                actual_position = self.card_manager.cards[card.name].position
+                                selection_tuple = (card.name, None, None, None, actual_position)
+                            else:
+                                # For deck cards, find the deck and use the actual position from deck entry
+                                for deck in self.deck_manager.decks:
+                                    if deck.id in self.placed_decks and group in deck.deck and card.name in deck.deck[group]:
+                                        if idx < len(deck.deck[group][card.name]):
+                                            actual_position = deck.deck[group][card.name][idx]["position"]
+                                            selection_tuple = (card.name, deck.id, group, idx, actual_position)
+                                            break
+                                else:
+                                    continue  # Skip if deck not found
+                            
+                            affected.append(selection_tuple)
 
                     if self.alt_held:
-                        for name, pos_group, pos_idx in affected:
-                            if (name, pos_group, pos_idx) in self.selected_cards:
-                                self.selected_cards.remove((name, pos_group, pos_idx))
+                        for selection_tuple in affected:
+                            if selection_tuple in self.selected_cards:
+                                self.selected_cards.remove(selection_tuple)
                     elif self.shift_held:
-                        for name, pos_group, pos_idx in affected:
-                            if (name, pos_group, pos_idx) not in self.selected_cards:
-                                self.selected_cards.append((name, pos_group, pos_idx))
+                        for selection_tuple in affected:
+                            if selection_tuple not in self.selected_cards:
+                                self.selected_cards.append(selection_tuple)
                     else:
-                        self.selected_cards = [(name, pos_group, pos_idx) for name, pos_group, pos_idx in affected]
+                        self.selected_cards = affected
 
                     self.selection_box = None
                 self.dragging_card = False
+                self.drag_anchor_card = None  # Clear the anchor card when dragging stops
                 
                 # DISABLED: Check if cards were dropped on deck regions or dragged out of regions
                 # if self.selected_cards:
                 #     self.handle_card_drop_on_deck_regions()
                 
                 if not self.selection_box and self.selected_cards:
-                    for name, pos_group, pos_idx in self.selected_cards:
-                        if name is None:
+                    for card_name, deck_id, board_name, entry_index, position in self.selected_cards:
+                        if card_name is None:
                             print("[DEBUG] Skipping None key in selected_cards.")
                             continue
-                        if name not in self.card_manager.cards:
-                            print(f"[DEBUG] Skipping unknown card name in selected_cards: {name}")
+                        if card_name not in self.card_manager.cards:
+                            print(f"[DEBUG] Skipping unknown card name in selected_cards: {card_name}")
                             continue
-                        card = self.card_manager.cards[name]
-                        if pos_group in card.positions and pos_idx < len(card.positions[pos_group]):
-                            x, y = card.positions[pos_group][pos_idx]
-                            snapped_x, snapped_y = self.snap_card_to_grid(x, y, card)
-                            card.positions[pos_group][pos_idx] = (snapped_x, snapped_y)
-                            # print(f"[DEBUG] Snapped card {name} in {pos_group} to ({snapped_x}, {snapped_y})")
+                        
+                        x, y = position
+                        card = self.card_manager.cards[card_name]
+                        snapped_x, snapped_y = self.snap_card_to_grid(x, y, card)
+                        
+                        # Update the actual data structure based on card type
+                        self.update_card_position(card_name, deck_id, board_name, entry_index, (snapped_x, snapped_y))
 
         elif event.type == pygame.MOUSEMOTION:
             if self.is_panning:
@@ -605,22 +721,45 @@ class GUI_Manager:
                     self.offset_y += dy
                 self.last_mouse_pos = event.pos
 
-            elif (self.dragging_card and self.selected_card_index is not None and 
-                  self.selected_position_group is not None and self.selected_position_index is not None):
+            elif (self.dragging_card and self.selected_card_index is not None):
                 mx, my = event.pos
-                new_world_x = (mx - self.offset_x) / self.zoom - self.drag_offset[0]
-                new_world_y = (my - self.offset_y) / self.zoom - self.drag_offset[1]
-                dx = (new_world_x - 
-                      self.card_manager.cards[self.selected_card_index].positions[self.selected_position_group][self.selected_position_index][0])
-                dy = (new_world_y - 
-                      self.card_manager.cards[self.selected_card_index].positions[self.selected_position_group][self.selected_position_index][1])
+                new_world_x = (mx - self.offset_x) / self.zoom
+                new_world_y = (my - self.offset_y) / self.zoom
+                
+                # Calculate the new position for the dragged card
+                if self.selected_cards and self.drag_anchor_card:
+                    # Use the anchor card (the one that was clicked) for drag calculations
+                    anchor_card_name, anchor_deck_id, anchor_board_name, anchor_entry_index, anchor_current_pos = self.drag_anchor_card
+                    
+                    # Get the true original position for the anchor card
+                    anchor_original_pos_key = (anchor_card_name, anchor_deck_id, anchor_board_name, anchor_entry_index)
+                    if anchor_original_pos_key in self.original_positions:
+                        anchor_original_pos = self.original_positions[anchor_original_pos_key]
+                        
+                        # Calculate new position by applying drag offset
+                        new_x = new_world_x - self.drag_offset[0]
+                        new_y = new_world_y - self.drag_offset[1]
+                        
+                        # Calculate the total movement from original position
+                        dx = new_x - anchor_original_pos[0]
+                        dy = new_y - anchor_original_pos[1]
 
-                # Move all selected cards
-                for name, pos_group, pos_idx in self.selected_cards:
-                    card = self.card_manager.cards[name]
-                    if pos_group in card.positions and pos_idx < len(card.positions[pos_group]):
-                        x, y = card.positions[pos_group][pos_idx]
-                        self.card_manager.cards[name].positions[pos_group][pos_idx] = (x + dx, y + dy)
+                        # Move all selected cards by the same offset
+                        for i, (sel_card_name, sel_deck_id, sel_board_name, sel_entry_index, sel_position) in enumerate(self.selected_cards):
+                            # Get the original position for this card
+                            original_pos_key = (sel_card_name, sel_deck_id, sel_board_name, sel_entry_index)
+                            if original_pos_key in self.original_positions:
+                                original_pos = self.original_positions[original_pos_key]
+                                # Calculate new position based on original position + movement
+                                new_card_x = original_pos[0] + dx
+                                new_card_y = original_pos[1] + dy
+                                new_position = (new_card_x, new_card_y)
+                                
+                                # Update the actual data structure based on card type
+                                self.update_card_position(sel_card_name, sel_deck_id, sel_board_name, sel_entry_index, new_position)
+                                
+                                # Update the position in selected_cards list so drawing reflects the new position
+                                self.selected_cards[i] = (sel_card_name, sel_deck_id, sel_board_name, sel_entry_index, new_position)
 
             elif self.selection_box:
                 x0, y0, _, _ = self.selection_box
@@ -697,21 +836,6 @@ class GUI_Manager:
         # Store the deck IDs that were placed so we can restore their buttons
         placed_deck_ids = list(self.placed_decks)
         
-        # Remove all deck cards from card manager positions
-        for deck in self.deck_manager.decks:
-            if deck.id in self.placed_decks:
-                for board_name, board_data in deck.deck.items():
-                    for card_name, entries in board_data.items():
-                        if card_name not in self.card_manager.cards:
-                            continue
-                        
-                        card = self.card_manager.cards[card_name]
-                        position_group = f"{deck.name}_{board_name}"
-                        
-                        # Remove all positions for this deck
-                        if position_group in card.positions:
-                            del card.positions[position_group]
-        
         # Clear placed decks set
         self.placed_decks.clear()
         
@@ -729,256 +853,6 @@ class GUI_Manager:
                 self.sidebar.add_deck_button(deck.name, deck.id)
         
         print("✅ Cleared all placed decks from the grid")
-
-    def handle_card_double_click(self, card_name: str, pos_group: str, pos_idx: int, world_x: float, world_y: float):
-        """Handle double-click on a card - duplicate if in deck, add to deck if base card, ignore if no deck"""
-        # Check if this card is in a deck
-        deck_name = None
-        board_name = None
-        
-        # Extract deck name from position group (format: "DeckName_boardname")
-        if "_" in pos_group:
-            parts = pos_group.split("_", 1)
-            if len(parts) == 2:
-                deck_name = parts[0]
-                board_name = parts[1]
-        
-        if deck_name and board_name:
-            # Card is in a deck - duplicate it
-            self.duplicate_card_in_deck(card_name, deck_name, board_name, world_x, world_y)
-        elif pos_group == "base":
-            # Base card - add to deck if one is loaded, otherwise do nothing
-            if self.placed_decks:
-                self.add_base_card_to_deck(card_name, world_x, world_y)
-            else:
-                print("ℹ️ No deck loaded - base card double-click ignored")
-        else:
-            # Card is not in a deck and not a base card - do nothing
-            print("ℹ️ Double-click ignored for non-deck, non-base card")
-
-    def duplicate_card_in_deck(self, card_name: str, deck_name: str, board_name: str, world_x: float, world_y: float):
-        """Duplicate a card within a deck by adding a new position offset by grid spacing"""
-        # Find the deck
-        target_deck = None
-        for deck in self.deck_manager.decks:
-            if deck.name == deck_name and deck.id in self.placed_decks:
-                target_deck = deck
-                break
-        
-        if not target_deck:
-            print(f"❌ Deck '{deck_name}' not found or not placed")
-            return
-        
-        # Calculate new position offset by grid spacing
-        import Layout_Manager as LM
-        grid_spacing_x, grid_spacing_y = LM.GRID_SPACING
-        new_x = int(world_x + grid_spacing_x)
-        new_y = int(world_y + grid_spacing_y)
-        
-        # Add the card to the deck at the new position
-        print(f"➕ Duplicating {card_name} in {deck_name} - {board_name} at ({new_x}, {new_y})")
-        target_deck.add_card(board_name, card_name, (new_x, new_y))
-        
-        # Add to card manager positions
-        card = self.card_manager.cards[card_name]
-        position_group = f"{deck_name}_{board_name}"
-        if position_group not in card.positions:
-            card.positions[position_group] = []
-        card.positions[position_group].append((new_x, new_y))
-        
-        print(f"✅ Duplicated {card_name} in {deck_name} - {board_name}")
-
-    def add_base_card_to_deck(self, card_name: str, world_x: float, world_y: float):
-        """Add a base card to the currently loaded deck with position offset by grid spacing"""
-        # Get the currently loaded deck (should be only one)
-        if not self.placed_decks:
-            print("❌ No deck loaded")
-            return
-        
-        # Get the first (and only) placed deck
-        deck_id = list(self.placed_decks)[0]
-        target_deck = None
-        for deck in self.deck_manager.decks:
-            if deck.id == deck_id:
-                target_deck = deck
-                break
-        
-        if not target_deck:
-            print("❌ Placed deck not found")
-            return
-        
-        # Calculate new position offset by grid spacing
-        import Layout_Manager as LM
-        grid_spacing_x, grid_spacing_y = LM.GRID_SPACING
-        new_x = int(world_x + grid_spacing_x)
-        new_y = int(world_y + grid_spacing_y)
-        
-        # Add the card to the deck's mainboard at the new position
-        print(f"➕ Adding base card {card_name} to {target_deck.name} - mainboard at ({new_x}, {new_y})")
-        target_deck.add_card("mainboard", card_name, (new_x, new_y))
-        
-        # Add to card manager positions
-        card = self.card_manager.cards[card_name]
-        position_group = f"{target_deck.name}_mainboard"
-        if position_group not in card.positions:
-            card.positions[position_group] = []
-        card.positions[position_group].append((new_x, new_y))
-        
-        print(f"✅ Added base card {card_name} to {target_deck.name} - mainboard")
-
-    def delete_selected_cards(self):
-        """Delete all selected cards from their respective deck locations only"""
-        if not self.selected_cards:
-            print("ℹ️ No cards selected for deletion")
-            return
-        
-        print(f"🗑️ Deleting {len(self.selected_cards)} selected cards from decks")
-        
-        # Process each selected card for deletion
-        for card_name, pos_group, pos_idx in self.selected_cards:
-            if card_name not in self.card_manager.cards:
-                continue
-            
-            # Check if this card is in a deck
-            deck_name = None
-            board_name = None
-            
-            # Extract deck name from position group (format: "DeckName_boardname")
-            if "_" in pos_group:
-                parts = pos_group.split("_", 1)
-                if len(parts) == 2:
-                    deck_name = parts[0]
-                    board_name = parts[1]
-            
-            if deck_name and board_name:
-                # Card is in a deck - remove it from the deck
-                self.delete_card_from_deck(card_name, deck_name, board_name, pos_idx)
-            else:
-                # Card is not in a deck (base card or other) - cannot be deleted
-                print(f"ℹ️ Cannot delete {card_name} - not in a deck")
-        
-        # Clear selection after deletion
-        self.selected_cards = []
-        print("✅ Card deletion completed")
-
-    def delete_card_from_deck(self, card_name: str, deck_name: str, board_name: str, pos_idx: int):
-        """Delete a card from a deck by removing its position"""
-        # Find the deck
-        target_deck = None
-        for deck in self.deck_manager.decks:
-            if deck.name == deck_name and deck.id in self.placed_decks:
-                target_deck = deck
-                break
-        
-        if not target_deck:
-            print(f"❌ Deck '{deck_name}' not found or not placed")
-            return
-        
-        # Get the card's position
-        card = self.card_manager.cards[card_name]
-        position_group = f"{deck_name}_{board_name}"
-        if position_group not in card.positions or pos_idx >= len(card.positions[position_group]):
-            print("❌ Card position not found")
-            return
-        
-        position = card.positions[position_group][pos_idx]
-        
-        # Remove from deck
-        print(f"🗑️ Deleting {card_name} from {deck_name} - {board_name} at {position}")
-        target_deck.remove_card(board_name, card_name, position)
-        
-        # Remove from card manager positions
-        del card.positions[position_group][pos_idx]
-        
-        print(f"✅ Deleted {card_name} from {deck_name} - {board_name}")
-
-    def place_deck_on_grid(self, deck):
-        """Place a deck on the game grid with proper positioning"""
-        # Calculate position based on existing decks
-        position = self.calculate_deck_position(deck)
-        print(f"Placing deck '{deck.name}' at position {position}")
-        
-        # Place the deck using the deck manager
-        self.deck_manager.place_deck(deck, position, self.card_manager)
-        
-        # Add deck cards to card manager positions
-        self.add_deck_to_card_manager(deck)
-        
-        print(f"✅ Placed deck '{deck.name}' at position {position}")
-
-    def calculate_deck_position(self, deck):
-        """Calculate where to place a deck - always at the same position since only one deck is shown at a time"""
-        import Layout_Manager as LM
-        
-        # Always place at the same position since we only show one deck at a time
-        start_x = 0
-        start_y = 2035
-        
-        return (start_x, start_y)
-
-    def add_deck_to_card_manager(self, deck):
-        """Add deck cards to the card manager's position tracking"""
-        for board_name, board_data in deck.deck.items():
-            for card_name, entries in board_data.items():
-                if card_name not in self.card_manager.cards:
-                    continue
-                
-                card = self.card_manager.cards[card_name]
-                position_group = f"{deck.name}_{board_name}"
-                
-                # Add positions for this deck
-                if position_group not in card.positions:
-                    card.positions[position_group] = []
-                
-                for entry in entries:
-                    card.positions[position_group].append(entry["position"])
-        
-        # Update bounding boxes
-        self.update_deck_bounding_boxes()
-
-    def update_deck_bounding_boxes(self):
-        """Update bounding boxes for all placed decks"""
-        self.deck_bounding_boxes = {}
-        
-        for deck in self.deck_manager.decks:
-            if deck.id in self.placed_decks:
-                min_x, min_y, max_x, max_y = float('inf'), float('inf'), float('-inf'), float('-inf')
-                
-                for board_name, board_data in deck.deck.items():
-                    for card_name, entries in board_data.items():
-                        for entry in entries:
-                            x, y = entry["position"]
-                            min_x = min(min_x, x)
-                            min_y = min(min_y, y)
-                            max_x = max(max_x, x)
-                            max_y = max(max_y, y)
-                
-                if min_x != float('inf'):
-                    self.deck_bounding_boxes[deck.name] = (min_x, min_y, max_x, max_y)
-                    print(f"Deck bounding box for {deck.name}: {self.deck_bounding_boxes[deck.name]}")
-
-    def save_layout(self, filepath):
-        try:
-            # Create layout data structure
-            layout_data = {
-                "card_positions": {name: card.positions for name, card in self.card_manager.cards.items()},
-                "metadata": {
-                    "version": "1.0",
-                    "timestamp": str(pygame.time.get_ticks()),
-                    "has_updated_decks": len(self.placed_decks) > 0
-                }
-            }
-            
-            # Save layout file
-            with open(filepath, "w", encoding="utf-8") as f:
-                json.dump(layout_data, f, indent=2)
-            print(f"✅ Layout saved to {filepath}")
-            
-            # Save updated decks to separate files
-            self.save_updated_decks()
-            
-        except Exception as e:
-            print(f"❌ Failed to save layout: {e}")
 
     def save_updated_decks(self):
         """Save all placed decks to separate JSON files with '_updated' suffix"""
@@ -1039,43 +913,6 @@ class GUI_Manager:
                     print(f"❌ Failed to save updated deck {deck.name}: {e}")
         
         print(f"✅ Saved {saved_count} updated deck(s)")
-
-    def load_layout(self, filepath):
-        try:
-            if not os.path.exists(filepath):
-                print(f"⚠️ Layout file not found: {filepath}")
-                return
-            
-            with open(filepath, "r", encoding="utf-8") as f:
-                layout_data = json.load(f)
-            
-            # Handle both old and new format
-            if "card_positions" in layout_data:
-                # New format with metadata
-                card_positions = layout_data["card_positions"]
-                metadata = layout_data.get("metadata", {})
-                has_updated_decks = metadata.get("has_updated_decks", False)
-                
-                # Load updated decks if flag is set
-                if has_updated_decks:
-                    print("🔄 Loading updated decks...")
-                    self.load_updated_decks()
-            else:
-                # Old format - just card positions
-                card_positions = layout_data
-                has_updated_decks = False
-            
-            # Restore positions to the correct CardInfo objects by name
-            for name, positions in card_positions.items():
-                if name in self.card_manager.cards:
-                    self.card_manager.cards[name].positions = positions
-            
-            print(f"✅ Layout loaded from {filepath}")
-            if has_updated_decks:
-                print("✅ Updated decks loaded")
-            
-        except Exception as e:
-            print(f"❌ Failed to load layout: {e}")
 
     def load_updated_decks(self):
         """Load updated deck files and replace existing decks"""
@@ -1139,11 +976,334 @@ class GUI_Manager:
         
         print(f"✅ Loaded {len(updated_files)} updated deck(s)")
 
+    def handle_card_double_click(self, card_name: str, world_x: float, world_y: float, deck_id: Optional[str] = None, 
+                                 board_name: Optional[str] = None, entry_index: Optional[int] = None):
+        """Handle double-click on a card - duplicate if in deck, add to deck if base card, ignore if no deck"""
+        if deck_id and board_name and entry_index is not None:
+            # Card is in a deck - duplicate it
+            self.duplicate_card_in_deck(card_name, deck_id, board_name, world_x, world_y)
+        else:
+            # Base card - add to deck if one is loaded, otherwise do nothing
+            if self.placed_decks:
+                self.add_base_card_to_deck(card_name, world_x, world_y)
+            else:
+                print("ℹ️ No deck loaded - base card double-click ignored")
+
+    def duplicate_card_in_deck(self, card_name: str, deck_id: str, board_name: str, world_x: float, world_y: float):
+        """Duplicate a card within a deck by adding a new position offset by grid spacing"""
+        # Find the deck
+        target_deck = None
+        for deck in self.deck_manager.decks:
+            if deck.id == deck_id and deck.id in self.placed_decks:
+                target_deck = deck
+                break
+        
+        if not target_deck:
+            print(f"❌ Deck '{deck_id}' not found or not placed")
+            return
+        
+        # Calculate new position offset by grid spacing
+        import Layout_Manager as LM
+        grid_spacing = LM.GRID_SPACING
+        new_x = int(world_x + grid_spacing)
+        new_y = int(world_y + grid_spacing)
+        
+        # Add the card to the deck at the new position
+        print(f"➕ Duplicating {card_name} in {target_deck.name} - {board_name} at ({new_x}, {new_y})")
+        target_deck.add_card(board_name, card_name, (new_x, new_y))
+        
+        print(f"✅ Duplicated {card_name} in {target_deck.name} - {board_name}")
+
+    def add_base_card_to_deck(self, card_name: str, world_x: float, world_y: float):
+        """Add a base card to the currently loaded deck with position offset by grid spacing"""
+        # Get the currently loaded deck (should be only one)
+        if not self.placed_decks:
+            print("❌ No deck loaded")
+            return
+        
+        # Get the first (and only) placed deck
+        deck_id = list(self.placed_decks)[0]
+        target_deck = None
+        for deck in self.deck_manager.decks:
+            if deck.id == deck_id:
+                target_deck = deck
+                break
+        
+        if not target_deck:
+            print("❌ Placed deck not found")
+            return
+        
+        # Calculate new position offset by grid spacing
+        import Layout_Manager as LM
+        grid_spacing = LM.GRID_SPACING
+        new_x = int(world_x + grid_spacing)
+        new_y = int(world_y + grid_spacing)
+        
+        # Add the card to the deck's mainboard at the new position
+        print(f"➕ Adding base card {card_name} to {target_deck.name} - mainboard at ({new_x}, {new_y})")
+        target_deck.add_card("mainboard", card_name, (new_x, new_y))
+        
+        print(f"✅ Added base card {card_name} to {target_deck.name} - mainboard")
+
+    def delete_selected_cards(self):
+        """Delete all selected cards from their respective deck locations only"""
+        if not self.selected_cards:
+            print("ℹ️ No cards selected for deletion")
+            return
+        
+        print(f"🗑️ Deleting {len(self.selected_cards)} selected cards from decks")
+        
+        # Process each selected card for deletion
+        for card_name, deck_id, board_name, entry_index, position in self.selected_cards:
+            if card_name not in self.card_manager.cards:
+                continue
+            
+            if deck_id and board_name and entry_index is not None:
+                # Card is in a deck - remove it from the deck
+                self.delete_card_from_deck(card_name, deck_id, board_name, entry_index, position)
+            else:
+                # Card is not in a deck (base card or other) - cannot be deleted
+                print(f"ℹ️ Cannot delete {card_name} - not in a deck")
+        
+        # Clear selection after deletion
+        self.selected_cards = []
+        print("✅ Card deletion completed")
+
+    def delete_card_from_deck(self, card_name: str, deck_id: str, board_name: str, entry_index: int, position: Tuple[int, int]):
+        """Delete a card from a deck by removing it by index"""
+        # Find the deck
+        target_deck = None
+        for deck in self.deck_manager.decks:
+            if deck.id == deck_id and deck.id in self.placed_decks:
+                target_deck = deck
+                break
+        
+        if not target_deck:
+            print(f"❌ Deck '{deck_id}' not found or not placed")
+            return
+        
+        # Check if the card exists in the deck
+        if board_name not in target_deck.deck or card_name not in target_deck.deck[board_name]:
+            print(f"❌ Card '{card_name}' not found in {target_deck.name} - {board_name}")
+            return
+        
+        # Check if the entry_index is valid
+        entries = target_deck.deck[board_name][card_name]
+        if entry_index < 0 or entry_index >= len(entries):
+            print(f"❌ Invalid entry_index {entry_index} for {card_name} in {target_deck.name} - {board_name}")
+            return
+        
+        # Remove the card by index
+        print(f"🗑️ Deleting {card_name} from {target_deck.name} - {board_name} at index {entry_index}")
+        del entries[entry_index]
+        
+        # If this was the last entry for this card, remove the card entirely
+        if len(entries) == 0:
+            del target_deck.deck[board_name][card_name]
+        
+        print(f"✅ Deleted {card_name} from {target_deck.name} - {board_name}")
+
+    def place_deck_on_grid(self, deck):
+        """Place a deck on the game grid with proper positioning"""
+        # Calculate position based on existing decks
+        position = self.calculate_deck_position(deck)
+        print(f"Placing deck '{deck.name}' at position {position}")
+        
+        # Place the deck using the deck manager
+        self.deck_manager.place_deck(deck, position, self.card_manager)
+        
+        print(f"✅ Placed deck '{deck.name}' at position {position}")
+
+    def calculate_deck_position(self, deck):
+        """Calculate where to place a deck - always at the same position since only one deck is shown at a time"""
+        import Layout_Manager as LM
+        
+        # Always place at the same position since we only show one deck at a time
+        start_x = 0
+        start_y = 2035
+        
+        return (start_x, start_y)
+
+    def update_deck_bounding_boxes(self):
+        """Update bounding boxes for all placed decks"""
+        self.deck_bounding_boxes = {}
+        
+        for deck in self.deck_manager.decks:
+            if deck.id in self.placed_decks:
+                min_x, min_y, max_x, max_y = float('inf'), float('inf'), float('-inf'), float('-inf')
+                
+                for board_name, board_data in deck.deck.items():
+                    for card_name, entries in board_data.items():
+                        for entry in entries:
+                            x, y = entry["position"]
+                            min_x = min(min_x, x)
+                            min_y = min(min_y, y)
+                            max_x = max(max_x, x)
+                            max_y = max(max_y, y)
+                
+                if min_x != float('inf'):
+                    self.deck_bounding_boxes[deck.name] = (min_x, min_y, max_x, max_y)
+                    print(f"Deck bounding box for {deck.name}: {self.deck_bounding_boxes[deck.name]}")
+
+    def save_layout(self, filepath):
+        try:
+            # Create layout data structure
+            layout_data = {
+                "card_positions": {name: card.position for name, card in self.card_manager.cards.items()},
+                "metadata": {
+                    "version": "1.0",
+                    "timestamp": str(pygame.time.get_ticks()),
+                    "has_updated_decks": len(self.placed_decks) > 0
+                }
+            }
+            
+            # Save layout file
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(layout_data, f, indent=2)
+            print(f"✅ Layout saved to {filepath}")
+            
+            # Save updated decks to separate files
+            self.save_updated_decks()
+            
+        except Exception as e:
+            print(f"❌ Failed to save layout: {e}")
+
+    def load_layout(self, filepath):
+        try:
+            if not os.path.exists(filepath):
+                print(f"⚠️ Layout file not found: {filepath}")
+                return
+            
+            with open(filepath, "r", encoding="utf-8") as f:
+                layout_data = json.load(f)
+            
+            # Handle both old and new format
+            if "card_positions" in layout_data:
+                # New format with metadata
+                card_positions = layout_data["card_positions"]
+                metadata = layout_data.get("metadata", {})
+                has_updated_decks = metadata.get("has_updated_decks", False)
+                
+                # Load updated decks if flag is set
+                if has_updated_decks:
+                    print("🔄 Loading updated decks...")
+                    self.load_updated_decks()
+            else:
+                # Old format - just card positions
+                card_positions = layout_data
+                has_updated_decks = False
+            
+            # Restore positions to the correct Card objects by name
+            for name, position in card_positions.items():
+                if name in self.card_manager.cards:
+                    self.card_manager.cards[name].position = position
+            
+            print(f"✅ Layout loaded from {filepath}")
+            if has_updated_decks:
+                print("✅ Updated decks loaded")
+            
+        except Exception as e:
+            print(f"❌ Failed to load layout: {e}")
+
+    def _store_original_positions(self):
+        """Store original positions for all selected cards from their actual data sources"""
+        self.original_positions = {}
+        for sel_card_name, sel_deck_id, sel_board_name, sel_entry_index, sel_position in self.selected_cards:
+            if sel_deck_id is None:
+                # Base card - get position from card_manager
+                if sel_card_name in self.card_manager.cards:
+                    key = (sel_card_name, sel_deck_id, sel_board_name, sel_entry_index)
+                    self.original_positions[key] = self.card_manager.cards[sel_card_name].position
+            else:
+                # Deck card - get position from deck entry
+                for deck in self.deck_manager.decks:
+                    if deck.id == sel_deck_id and sel_board_name and sel_entry_index is not None:
+                        deck_board = deck.deck.get(sel_board_name, {})
+                        if sel_card_name in deck_board and sel_entry_index < len(deck_board[sel_card_name]):
+                            key = (sel_card_name, sel_deck_id, sel_board_name, sel_entry_index)
+                            self.original_positions[key] = deck_board[sel_card_name][sel_entry_index]["position"]
+                        break
+
+    def update_card_position(self, card_name, deck_id, board_name, entry_index, new_position):
+        """Update card position in the appropriate data structure based on card type"""
+        if deck_id is None:
+            # Base card - update card position in card_manager
+            if card_name in self.card_manager.cards:
+                self.card_manager.cards[card_name].position = new_position
+        else:
+            # Deck card - update deck entry position
+            for deck in self.deck_manager.decks:
+                if (deck.id == deck_id and board_name and entry_index is not None):
+                    deck.update_position(board_name, card_name, new_position, entry_index)
+                    break
+
+    def handle_card_selection(self, selection_tuple, mx, my, screen_x, screen_y):
+        """Handle card selection logic - much more concise than the old inline code"""
+        card_name, deck_id, board_name, entry_index, position = selection_tuple
+        
+        # Don't change selection if clicking an already selected card without modifiers
+        if selection_tuple in self.selected_cards:
+            self.selected_card_index = card_name
+            self.selected_deck = deck_id
+            self.selected_board = board_name
+            self.selected_entry_index = entry_index
+            self.dragging_card = True
+            self.drag_anchor_card = selection_tuple  # Store the clicked card
+            self.drag_offset = (
+                (mx - screen_x) / self.zoom,
+                (my - screen_y) / self.zoom
+            )
+            # Store original positions for all selected cards
+            self._store_original_positions()
+            return
+        
+        # Alt removes from selection
+        if self.alt_held:
+            if selection_tuple in self.selected_cards:
+                self.selected_cards.remove(selection_tuple)
+            return
+        
+        # Shift adds to selection
+        if self.shift_held:
+            self.selected_cards.append(selection_tuple)
+            self.selected_card_index = card_name
+            self.selected_deck = deck_id
+            self.selected_board = board_name
+            self.selected_entry_index = entry_index
+            self.dragging_card = True
+            self.drag_anchor_card = selection_tuple  # Store the clicked card
+            self.drag_offset = (
+                (mx - screen_x) / self.zoom,
+                (my - screen_y) / self.zoom
+            )
+            # Store original positions for all selected cards
+            self._store_original_positions()
+            return
+        
+        # Default behavior: select this card only
+        self.selected_cards = [selection_tuple]
+        self.selected_card_index = card_name
+        self.selected_deck = deck_id
+        self.selected_board = board_name
+        self.selected_entry_index = entry_index
+        self.dragging_card = True
+        self.drag_anchor_card = selection_tuple  # Store the clicked card
+        self.drag_offset = (
+            (mx - screen_x) / self.zoom,
+            (my - screen_y) / self.zoom
+        )
+        # Store original positions for all selected cards
+        self._store_original_positions()
+
     def snap_card_to_grid(self, x, y, card):
         """Snap a card to the appropriate grid based on its type"""
-        grid_h, grid_v = Card_Manager.get_adaptive_grid_spacing(card)
-        snapped_x = round(x / grid_h) * grid_h
-        snapped_y = round(y / grid_v) * grid_v
+        import Layout_Manager as LM
+        
+        # Snap to LM.GRID_SPACING units in world coordinates
+        grid_unit = LM.GRID_SPACING  # 55
+        
+        snapped_x = round(x / grid_unit) * grid_unit
+        snapped_y = round(y / grid_unit) * grid_unit
         return snapped_x, snapped_y
 
     def is_card_over_committed(self, card_name: str, pos_group: str) -> int:
@@ -1405,53 +1565,75 @@ class GUI_Manager:
         mouse_pos = pygame.mouse.get_pos()
         hovered_card = None
         
-        # Find which card the mouse is hovering over
-        for card in self.card_manager.cards.values():
-            if card.image_surface is None:
+        # Find which card the mouse is hovering over (check deck cards first, then base cards)
+        for deck in self.deck_manager.decks:
+            if deck.id not in self.placed_decks:
                 continue
-            for pos_group, positions in card.positions.items():
-                if not positions:
-                    continue
-                for pos_idx, (world_x, world_y) in enumerate(positions):
-                    screen_x = world_x * self.zoom + self.offset_x
-                    screen_y = world_y * self.zoom + self.offset_y
-                    scaled_w = int(LM.CARD_DIMENSIONS[0] * self.zoom)
-                    scaled_h = int(LM.CARD_DIMENSIONS[1] * self.zoom)
+                
+            for board_name, board_data in deck.deck.items():
+                for card_name, entries in board_data.items():
+                    if card_name not in self.card_manager.cards:
+                        continue
+                        
+                    card = self.card_manager.cards[card_name]
+                    if card.image_thumbs is None or len(card.image_thumbs) == 0:
+                        continue
+                    
+                    for entry in entries:
+                        world_x, world_y = entry["position"]
+                        screen_x = world_x * self.zoom + self.offset_x
+                        screen_y = world_y * self.zoom + self.offset_y
+                        scaled_w = int(LM.CARD_DIMENSIONS[0] * self.zoom)
+                        scaled_h = int(LM.CARD_DIMENSIONS[1] * self.zoom)
 
-                    # Adjust for rotated Site cards
-                    is_site = getattr(card, "type", "").lower() == "site"
-                    if is_site:
-                        scaled_w, scaled_h = scaled_h, scaled_w
+                        # Adjust for rotated Site cards
+                        is_site = getattr(card, "type", "").lower() == "site"
+                        if is_site:
+                            scaled_w, scaled_h = scaled_h, scaled_w
 
-                    rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
-                    if rect.collidepoint(mouse_pos):
-                        hovered_card = card
+                        rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
+                        if rect.collidepoint(mouse_pos):
+                            hovered_card = card
+                            break
+                    if hovered_card:
                         break
                 if hovered_card:
                     break
             if hovered_card:
                 break
         
-        if hovered_card and hovered_card.image_surface:
+        # If no deck card was found, check base cards
+        if not hovered_card:
+            for card in self.card_manager.cards.values():
+                if card.image_thumbs is None or len(card.image_thumbs) == 0:
+                    continue
+                
+                world_x, world_y = card.position
+                screen_x = world_x * self.zoom + self.offset_x
+                screen_y = world_y * self.zoom + self.offset_y
+                scaled_w = int(LM.CARD_DIMENSIONS[0] * self.zoom)
+                scaled_h = int(LM.CARD_DIMENSIONS[1] * self.zoom)
+
+                # Adjust for rotated Site cards
+                is_site = getattr(card, "type", "").lower() == "site"
+                if is_site:
+                    scaled_w, scaled_h = scaled_h, scaled_w
+
+                rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
+                if rect.collidepoint(mouse_pos):
+                    hovered_card = card
+                    break
+        
+        if hovered_card and hovered_card.image_thumbs and len(hovered_card.image_thumbs) > 0:
             # Check if this is a site card (horizontal cards)
             is_site = getattr(hovered_card, "type", "").lower() == "site"
             
+            preview_height = 420
+            preview_width = int(preview_height * (LM.CARD_DIMENSIONS[0] / LM.CARD_DIMENSIONS[1]))
+            preview_surface = pygame.transform.smoothscale(hovered_card.image_thumbs[-1], (preview_width, preview_height))
+            
             if is_site:
-                # For site cards, use width as the base dimension and rotate
-                preview_width = 420
-                preview_height = int(preview_width * (LM.CARD_DIMENSIONS[1] / LM.CARD_DIMENSIONS[0]))
-                
-                # Scale the card image for preview
-                preview_surface = pygame.transform.smoothscale(hovered_card.image_surface, (preview_width, preview_height))
-                # Rotate the preview -90 degrees (clockwise)
                 preview_surface = pygame.transform.rotate(preview_surface, -90)
-            else:
-                # For regular cards, use width as the base dimension
-                preview_width = 300
-                preview_height = int(preview_width * (LM.CARD_DIMENSIONS[1] / LM.CARD_DIMENSIONS[0]))
-                
-                # Scale the card image for preview
-                preview_surface = pygame.transform.smoothscale(hovered_card.image_surface, (preview_width, preview_height))
             
             # Position in top right corner with some padding
             padding = 20
@@ -1468,33 +1650,112 @@ class GUI_Manager:
 
     def run(self):
         running = True
+        frame_times = {}  # Store timings per frame
+        fps_history = []
+        last_fps_update = time.perf_counter()
+        fps = 0
+
         while running:
+            frame_start = time.perf_counter()
+
+            # --- Timing: Event Handling ---
+            t0 = time.perf_counter()
             time_delta = self.clock.tick(60) / 1000.0
             mouse_pos = pygame.mouse.get_pos()
-            
+            self.update_culling()
             self.sidebar.update(mouse_pos)
             
             for event in pygame.event.get():
                 running = self.handle_event(event)
-            
-            self.manager.update(time_delta)
-            self.window.fill(self.background_color)  # new black background
+            frame_times['Event'] = (time.perf_counter() - t0) * 1000
 
+            # --- Timing: UI Manager Update ---
+            t0 = time.perf_counter()
+            self.manager.update(time_delta)
+            frame_times['UI Manager'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Window Fill ---
+            t0 = time.perf_counter()
+            self.window.fill(self.background_color)
+            frame_times['Fill'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Draw Grid ---
+            t0 = time.perf_counter()
             self.draw_grid()
-            self.draw_cards()
+            frame_times['Grid'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Draw Cards ---
+            t0 = time.perf_counter()
+            timings = self.draw_cards()
+            frame_times['Cards'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Draw Selection Box ---
+            t0 = time.perf_counter()
             self.draw_selection_box()
-            
+            frame_times['SelectBox'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Draw Loading UI (if loading) ---
+            t0 = time.perf_counter()
             if self.card_manager.loading:
                 self.draw_loading_ui()
-            
-            self.draw_debug_info()
-            self.draw_card_preview()  # Draw the new preview
+            frame_times['LoadingUI'] = (time.perf_counter() - t0) * 1000
 
+            # --- Timing: Draw Debug Info ---
+            t0 = time.perf_counter()
+            self.draw_debug_info(timings, fps)
+            frame_times['DebugInfo'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Draw Card Preview ---
+            t0 = time.perf_counter()
+            self.draw_card_preview()
+            frame_times['CardPreview'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Draw UI Manager UI ---
+            t0 = time.perf_counter()
             self.manager.draw_ui(self.window)
-            
-            # Draw button images on top of the UI
+            frame_times['UIDraw'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Draw Sidebar Button Images ---
+            t0 = time.perf_counter()
             self.sidebar.draw_button_images(self.window)
-            
+            frame_times['SidebarBtnImgs'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Display Flip ---
+            t0 = time.perf_counter()
             pygame.display.flip()
+            frame_times['Flip'] = (time.perf_counter() - t0) * 1000
+
+            frame_end = time.perf_counter()
+            frame_time_ms = (frame_end - frame_start) * 1000
+            fps_history.append(frame_time_ms)
+            if len(fps_history) > 60:
+                fps_history.pop(0)
+            # Update FPS once per 0.5 sec for stability
+            now = time.perf_counter()
+            if now - last_fps_update > 0.5:
+                avg_frame = sum(fps_history) / len(fps_history)
+                fps = int(1000 / avg_frame) if avg_frame > 0 else 0
+                last_fps_update = now
 
         pygame.quit()
+
+    def _is_card_selected(self, card_name: str, deck_id: Optional[str], board_name: Optional[str], entry_index: Optional[int]) -> bool:
+        """Check if a specific card instance is selected"""
+        
+        for sel_card_name, sel_deck_id, sel_board_name, sel_entry_index, sel_position in self.selected_cards:           
+            # Handle base cards (deck_id is None) - entry_index should be None for base cards
+            # But visible_cards uses -1 for base cards, so we need to handle both cases
+            if deck_id is None and sel_deck_id is None:
+                if (sel_card_name == card_name and 
+                    sel_board_name == board_name and 
+                    (sel_entry_index == entry_index or 
+                     (sel_entry_index is None and entry_index == -1))):
+                    return True
+            # Handle deck cards (deck_id is not None)
+            elif deck_id is not None and sel_deck_id is not None:
+                if (sel_card_name == card_name and 
+                    sel_deck_id == deck_id and 
+                    sel_board_name == board_name and 
+                    sel_entry_index == entry_index):
+                    return True
+        return False

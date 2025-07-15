@@ -18,6 +18,7 @@ import re
 from typing import List, Dict, Any, Tuple, Optional
 import pygame
 from Util_IO import _save_json
+from PIL import Image
 
 class Card:   
 
@@ -28,8 +29,10 @@ class Card:
         self.slug = slug
         self.hotscore = hotscore
         self.image_url = self.check_img_url(name, img_url)
-        self.image_surface: Optional[pygame.Surface] = None
-        self.positions: Dict[str, List[Tuple[int, int]]] = {}
+        self.image_thumbs: Optional[List[pygame.Surface]] = []
+        self.thumb_levels = [1/30, 1/15, 1/10, 1/8, 1/4, 1/2, 1] 
+        self.position: Tuple[int, int] = (-1, -1)
+        self.scaled_surfaces = {} 
 
         self.rareity = rarity
         self.type = type_
@@ -247,7 +250,21 @@ class Card:
         if name in missing_cards:
             return f"https://card.cards.army/cards/{missing_cards[name]}.webp"
         return img_url
-    
+    	
+    def set_scaled_surfaces(self, img: Image.Image):
+        if self.image_thumbs is None:
+            self.image_thumbs = []
+            
+        if len(self.image_thumbs) != 0:
+            self.image_thumbs = []
+            
+        for scale in self.thumb_levels:
+            w, h = int(img.width * scale), int(img.height * scale)
+            resized = img.resize((w, h), Image.Resampling.LANCZOS)
+            raw = resized.tobytes("raw", "RGBA")
+            surf = pygame.image.frombytes(raw, (w, h), "RGBA").convert_alpha()
+            self.image_thumbs.append(surf)
+
     @staticmethod
     def print_group(grouped):
         print(f"[DEBUG] grouped (elements): {len(grouped)}")
@@ -313,7 +330,8 @@ class Card:
                 if key in clause:
                     setattr(self, attr, True)
 
-	
+
+
 if __name__ == "__main__":
     import requests
     from bs4 import BeautifulSoup

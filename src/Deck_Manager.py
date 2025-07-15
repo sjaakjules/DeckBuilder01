@@ -132,12 +132,12 @@ class Deck_Manager:
         import Layout_Manager as LM
         
         # Ensure position aligns to grid (use 55 for both X and Y)
-        start_x = round(position[0] / LM.GRID_SPACING[0]) * LM.GRID_SPACING[0]
-        start_y = round(position[1] / LM.GRID_SPACING[0]) * LM.GRID_SPACING[0]
+        start_x = round(position[0] / LM.GRID_SPACING) * LM.GRID_SPACING
+        start_y = round(position[1] / LM.GRID_SPACING) * LM.GRID_SPACING
         
         # Use Layout_Manager constants for grid and region dimensions
-        grid_unit = LM.GRID_SPACING[0]  # 55
-        row_spacing = LM.SPACING[1]  # 165 for proper row spacing
+        grid_unit = LM.GRID_SPACING  # 55
+        row_spacing = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # 165 for proper row spacing
         grid_width = self.GRID_WIDTH
         
         # Region dimensions from class constants
@@ -149,8 +149,8 @@ class Deck_Manager:
         maybeboard_height = self.MAYBEBOARD_HEIGHT
         
         # Calculate card start positions with offsets (cards are inset from region edges)
-        mainboard_card_start_x = start_x + LM.REGION_PADDING  # 110
-        mainboard_card_start_y = start_y + LM.REGION_PADDING  # 110
+        mainboard_card_start_x = start_x + LM.REGION_PADDING * LM.GRID_SPACING  # 110
+        mainboard_card_start_y = start_y + LM.REGION_PADDING * LM.GRID_SPACING  # 110
         
         # Place avatar in top left of mainboard region (with offset)
         if "avatar" in deck.deck and deck.deck["avatar"]:
@@ -164,14 +164,14 @@ class Deck_Manager:
         # Place mainboard cards in grid (within the region with offsets)
         mainboard_cards = self._get_sorted_cards(deck, "mainboard", card_manager.card_data_lookup)
         self._place_cards_in_grid(mainboard_cards, deck, "mainboard", 
-                                 (mainboard_card_start_x + LM.REGION_PADDING, mainboard_card_start_y), 
+                                 (mainboard_card_start_x + LM.REGION_PADDING * LM.GRID_SPACING, mainboard_card_start_y), 
                                  mainboard_width, mainboard_height, grid_width, grid_unit, row_spacing)
         
         # Place sideboard cards in grid
         sideboard_cards = self._get_sorted_cards(deck, "sideboard", card_manager.card_data_lookup)
         sideboard_y = start_y + mainboard_height
-        sideboard_card_start_x = start_x + LM.REGION_PADDING  # 110
-        sideboard_card_start_y = sideboard_y + LM.REGION_PADDING  # 110
+        sideboard_card_start_x = start_x + LM.REGION_PADDING * LM.GRID_SPACING  # 110
+        sideboard_card_start_y = sideboard_y + LM.REGION_PADDING * LM.GRID_SPACING  # 110
         self._place_cards_in_grid(sideboard_cards, deck, "sideboard", 
                                  (sideboard_card_start_x, sideboard_card_start_y), 
                                  sideboard_width, sideboard_height, grid_width, grid_unit, row_spacing)
@@ -179,8 +179,8 @@ class Deck_Manager:
         # Place maybeboard cards in grid
         maybeboard_cards = self._get_sorted_cards(deck, "maybeboard", card_manager.card_data_lookup)
         maybeboard_y = sideboard_y + sideboard_height
-        maybeboard_card_start_x = start_x + LM.REGION_PADDING  # 110
-        maybeboard_card_start_y = maybeboard_y + LM.REGION_PADDING  # 110
+        maybeboard_card_start_x = start_x + LM.REGION_PADDING * LM.GRID_SPACING  # 110
+        maybeboard_card_start_y = maybeboard_y + LM.REGION_PADDING * LM.GRID_SPACING  # 110
         self._place_cards_in_grid(maybeboard_cards, deck, "maybeboard", 
                                  (maybeboard_card_start_x, maybeboard_card_start_y), 
                                  maybeboard_width, maybeboard_height, grid_width, grid_unit, row_spacing)
@@ -238,14 +238,14 @@ class Deck_Manager:
                             grid_width: int, grid_unit: int, row_spacing: int):
         """Place cards in a grid within the specified region"""
         start_x, start_y = position
-        current_x, current_y = start_x + LM.REGION_PADDING, start_y + LM.REGION_PADDING
+        current_x, current_y = start_x + LM.REGION_PADDING * LM.GRID_SPACING, start_y + LM.REGION_PADDING * LM.GRID_SPACING
         cards_in_current_row = 0
         current_row_width = 0
         
         # Calculate available space for cards (region dimensions minus offsets)
         # The region dimensions already include the offset padding, so we need to subtract it
-        available_width = region_width - (4 * LM.REGION_PADDING)
-        available_height = region_height - (2 * LM.REGION_PADDING)
+        available_width = region_width - (4 * LM.REGION_PADDING * LM.GRID_SPACING)
+        available_height = region_height - (2 * LM.REGION_PADDING * LM.GRID_SPACING)
         
         # Adjust grid width to fit within available space
         max_cards_per_row = available_width // grid_unit
@@ -303,10 +303,10 @@ class Deck_Manager:
     def _place_deck_two_elements(self, deck: Deck, position: Tuple[int, int], card_manager: Card_Manager):
         """Place deck with 2 elements using the new layout approach"""
         start_x, start_y = position
-        card_spacing_x, card_spacing_y = LM.SPACING[0], LM.SPACING[1]  # 110x165
-        site_spacing_x, site_spacing_y = LM.SPACING[1], LM.SPACING[0]  # 165x110 for sites
-        group_padding = 110
-        board_padding = 220
+        card_spacing_x, card_spacing_y = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO, LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # 110x165
+        site_spacing_x, site_spacing_y = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO, LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # 165x110 for sites
+        group_padding = LM.GRID_SPACING * LM.REGION_PADDING
+        board_padding = LM.GRID_SPACING * LM.BOARD_PADDING
         
         # Get deck elements and card data
         deck_elements = self._get_deck_elements(deck, card_manager.card_data_lookup)
@@ -426,10 +426,10 @@ class Deck_Manager:
     def _place_deck_standard(self, deck: Deck, position: Tuple[int, int], card_manager: Card_Manager):
         """Original standard deck placement logic"""
         start_x, start_y = position
-        card_spacing_x, card_spacing_y = LM.SPACING[0], LM.SPACING[1]  # 110x165
-        site_spacing_x, site_spacing_y = LM.SPACING[1], LM.SPACING[0]  # 165x110 for sites
-        group_padding = 110  # Padding between groups
-        board_padding = 220  # Padding between mainboard and sideboard/maybeboard
+        card_spacing_x, card_spacing_y = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO, LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # 110x165
+        site_spacing_x, site_spacing_y = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO, LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # 165x110 for sites
+        group_padding = LM.GRID_SPACING * LM.REGION_PADDING
+        board_padding = LM.GRID_SPACING * LM.BOARD_PADDING
         
         # Get card data lookup
         card_lookup = card_manager.card_data_lookup
