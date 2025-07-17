@@ -14,6 +14,8 @@ from Util_IO import _save_json
 from Deck import Deck
 from Card import Card
 import time
+import threading
+import queue
 
 
 class GUI_Manager:
@@ -81,6 +83,14 @@ class GUI_Manager:
         self.last_click_pos = None
         self.double_click_threshold = 300  # milliseconds
         self.double_click_distance = 10  # pixels
+        
+        # Background operation support
+        self.background_operation = None
+        self.background_operation_queue = queue.Queue()
+        self.background_operation_thread = None
+        self.background_operation_status = "idle"  # idle, running, completed, error
+        self.background_operation_message = ""
+        self.background_operation_progress = 0.0  # 0.0 to 1.0
       
     def draw_grid(self):
         spacing_h = LM.GRID_SPACING  # world units
@@ -424,7 +434,7 @@ class GUI_Manager:
         if is_site:
             card_surface = pygame.transform.rotate(card_surface, -90)
         
-        rect = card_surface.get_rect(center=(screen_x, screen_y))
+        rect = card_surface.get_rect(topleft=(screen_x, screen_y))
         self.window.blit(card_surface, rect.topleft)
         
         return rect
@@ -451,6 +461,280 @@ class GUI_Manager:
         text_surface = self.font.render(f"{pct}%", True, (230, 230, 230))
         text_rect = text_surface.get_rect(center=center)
         self.window.blit(text_surface, text_rect)
+    
+    def draw_background_operation_ui(self):
+        """Draw loading UI for background operations (login, deck loading, etc.)"""
+        if self.background_operation_status == "idle":
+            return
+            
+        # Semi-transparent overlay
+        overlay = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 128))
+        self.window.blit(overlay, (0, 0))
+        
+        # Loading box
+        box_width = 400
+        box_height = 150
+        box_x = (self.WIDTH - box_width) // 2
+        box_y = (self.HEIGHT - box_height) // 2
+        
+        # Draw box background
+        box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
+        pygame.draw.rect(self.window, (50, 50, 50), box_rect)
+        pygame.draw.rect(self.window, (200, 200, 200), box_rect, 2)
+        
+        # Spinner
+        spinner_center = (box_x + box_width // 2, box_y + 40)
+        spinner_radius = 20
+        spinner_thickness = 4
+        spinner_rect = pygame.Rect(spinner_center[0] - spinner_radius, spinner_center[1] - spinner_radius, 
+                                  spinner_radius * 2, spinner_radius * 2)
+        
+        start_angle = math.radians(self.spinner_angle)
+        end_angle = start_angle + math.pi * 1.5
+        pygame.draw.circle(self.window, (100, 100, 100), spinner_center, spinner_radius, spinner_thickness)
+        pygame.draw.arc(self.window, (120, 200, 255), spinner_rect, start_angle, end_angle, spinner_thickness)
+        self.spinner_angle = (self.spinner_angle + 8) % 360
+        
+        # Status message
+        if self.background_operation_message:
+            text_surface = self.font.render(self.background_operation_message, True, (230, 230, 230))
+            text_rect = text_surface.get_rect(center=(box_x + box_width // 2, box_y + 80))
+            self.window.blit(text_surface, text_rect)
+        
+        # Progress bar (if operation has progress)
+        if self.background_operation_progress > 0:
+            progress_width = box_width - 40
+            progress_height = 20
+            progress_x = box_x + 20
+            progress_y = box_y + 110
+            
+            # Background bar
+            pygame.draw.rect(self.window, (100, 100, 100), 
+                           (progress_x, progress_y, progress_width, progress_height))
+            
+            # Progress bar
+            filled_width = int(progress_width * self.background_operation_progress)
+            if filled_width > 0:
+                pygame.draw.rect(self.window, (120, 200, 255), 
+                               (progress_x, progress_y, filled_width, progress_height))
+            
+            # Progress text
+            progress_text = f"{int(self.background_operation_progress * 100)}%"
+            progress_surface = self.font.render(progress_text, True, (230, 230, 230))
+            progress_rect = progress_surface.get_rect(center=(box_x + box_width // 2, progress_y + progress_height // 2))
+            self.window.blit(progress_surface, progress_rect)
+    
+    def start_background_operation(self, operation_type: str, initial_message: str):
+        """Start a background operation in a separate thread"""
+        if self.background_operation_status == "running":
+            print("⚠️ Background operation already in progress")
+            return
+        
+        self.background_operation = operation_type
+        self.background_operation_status = "running"
+        self.background_operation_message = initial_message
+        self.background_operation_progress = 0.0
+        
+        # Start background thread
+        self.background_operation_thread = threading.Thread(
+            target=self._run_background_operation,
+            args=(operation_type,),
+            daemon=True
+        )
+        self.background_operation_thread.start()
+    
+    def _run_background_operation(self, operation_type: str):
+        """Run the actual background operation"""
+        try:
+            if operation_type == "login":
+                self._run_curiosa_login()
+            elif operation_type == "load_deck":
+                self._run_deck_loading()
+            else:
+                raise ValueError(f"Unknown operation type: {operation_type}")
+                
+        except Exception as e:
+            self.background_operation_status = "error"
+            self.background_operation_message = f"Error: {str(e)}"
+            print(f"❌ Background operation failed: {e}")
+    
+    def _run_curiosa_login(self):
+        """Run Curiosa login in background thread"""
+        try:
+            self.background_operation_message = "Initializing Curiosa API..."
+            self.background_operation_progress = 0.1
+            
+            # Create Curiosa API instance
+            from Curiosa_API import CuriosaAPI
+            curiosa = CuriosaAPI()
+            
+            self.background_operation_message = "Opening login window..."
+            self.background_operation_progress = 0.2
+            
+            # Login (this will open browser window)
+            curiosa.login()
+            
+            self.background_operation_message = "Fetching user data..."
+            self.background_operation_progress = 0.5
+            
+            # Fetch user cards
+            curiosa.fetch_user_cards()
+            
+            self.background_operation_message = "Processing collection..."
+            self.background_operation_progress = 0.7
+            
+            # Process collection data
+            if curiosa.collection:
+                if isinstance(curiosa.collection, list):
+                    from Collection import Collection
+                    self.collection_manager.collection = Collection.from_online_json(curiosa.collection)
+                    self.background_operation_message = "Loading user decks..."
+                    self.background_operation_progress = 0.8
+                    
+                    # Download user decks
+                    self.deck_manager.download_user_decks(curiosa)
+                    
+                    # Add deck buttons to sidebar
+                    for deck in self.deck_manager.decks:
+                        self.background_operation_queue.put(("add_deck_button", deck.name, deck.id))
+                    
+                    self.background_operation_message = "Login completed successfully!"
+                    self.background_operation_progress = 1.0
+                    self.background_operation_status = "completed"
+                else:
+                    raise Exception("Curiosa collection is not a list")
+            else:
+                raise Exception("No collection data returned from Curiosa")
+                
+        except Exception as e:
+            self.background_operation_status = "error"
+            self.background_operation_message = f"Login failed: {str(e)}"
+            print(f"❌ Curiosa login failed: {e}")
+    
+    def _run_deck_loading(self):
+        """Run deck loading in background thread"""
+        try:
+            self.background_operation_message = "Opening deck selection dialog..."
+            self.background_operation_progress = 0.1
+            
+            # Get deck URL from user (this needs to be done in main thread)
+            # We'll use a queue to communicate with main thread
+            self.background_operation_queue.put(("request_deck_url",))
+            
+            # Wait for response from main thread
+            deck_url = None
+            cancelled = False
+            while deck_url is None and not cancelled:
+                try:
+                    response = self.background_operation_queue.get(timeout=0.1)
+                    if response[0] == "deck_url_response":
+                        deck_url = response[1]
+                    elif response[0] == "deck_url_cancelled":
+                        cancelled = True
+                except queue.Empty:
+                    continue
+            
+            if cancelled:
+                self.background_operation_status = "idle"
+                return
+            
+            if not deck_url:
+                self.background_operation_status = "idle"
+                return
+            
+            self.background_operation_message = "Downloading deck data..."
+            self.background_operation_progress = 0.3
+            
+            # Download deck
+            from Curiosa_API import CuriosaAPI
+            deck_data = CuriosaAPI.fetch_curiosa_deck(deck_url)
+            
+            if not deck_data:
+                raise Exception("Failed to download deck data")
+            
+            self.background_operation_message = "Processing deck..."
+            self.background_operation_progress = 0.7
+            
+            # Process deck data
+            deck_name = deck_data.get("name", f"Deck_{deck_url}")
+            deck_author = deck_data.get("author", "Unknown")
+            deck_id = CuriosaAPI._extract_deck_id(deck_url)
+            
+            # Save deck to file
+            from Util_IO import DECK_PATH, _save_json
+            safe_filename = "".join(c for c in deck_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            safe_filename = safe_filename.replace(' ', '_')
+            _save_json(deck_data, f"{DECK_PATH}/{safe_filename}.json")
+            
+            # Load deck into viewer
+            deck = Deck.from_json(name=deck_name, author=deck_author, id=deck_id, json_data=deck_data)
+            self.deck_manager.decks.append(deck)
+            
+            # Add deck button to sidebar
+            self.background_operation_queue.put(("add_deck_button", deck_name, deck_id))
+            
+            self.background_operation_message = "Deck loaded successfully!"
+            self.background_operation_progress = 1.0
+            self.background_operation_status = "completed"
+            
+        except Exception as e:
+            self.background_operation_status = "error"
+            self.background_operation_message = f"Deck loading failed: {str(e)}"
+            print(f"❌ Deck loading failed: {e}")
+    
+    def check_background_operation_queue(self):
+        """Check for messages from background operations"""
+        try:
+            while True:
+                message = self.background_operation_queue.get_nowait()
+                
+                if message[0] == "add_deck_button":
+                    deck_name, deck_id = message[1], message[2]
+                    if hasattr(self, 'sidebar'):
+                        self.sidebar.add_deck_button(deck_name, deck_id)
+                        
+                elif message[0] == "request_deck_url":
+                    # Handle deck URL request in main thread
+                    self._handle_deck_url_request()
+                    
+        except queue.Empty:
+            pass
+        
+        # Auto-reset completed operations after a delay
+        if self.background_operation_status == "completed":
+            # Reset after 2 seconds to show completion message
+            if not hasattr(self, '_completion_timer'):
+                self._completion_timer = time.perf_counter()
+            elif self._completion_timer is not None and time.perf_counter() - self._completion_timer > 2.0:
+                self.background_operation_status = "idle"
+                self.background_operation_message = ""
+                self.background_operation_progress = 0.0
+                self._completion_timer = None
+        elif self.background_operation_status == "error":
+            # Reset error status after 5 seconds
+            if not hasattr(self, '_error_timer'):
+                self._error_timer = time.perf_counter()
+            elif self._error_timer is not None and time.perf_counter() - self._error_timer > 5.0:
+                self.background_operation_status = "idle"
+                self.background_operation_message = ""
+                self.background_operation_progress = 0.0
+                self._error_timer = None
+    
+    def _handle_deck_url_request(self):
+        """Handle deck URL request from background thread"""
+        from Util_IO import open_threadsafe_dialog, ask_string
+        
+        deck_url = open_threadsafe_dialog(
+            ask_string, 
+            title="Load Deck", 
+            prompt="Enter Curiosa Deck URL or ID:"
+        )
+        
+        if deck_url:
+            self.background_operation_queue.put(("deck_url_response", deck_url))
+        else:
+            self.background_operation_queue.put(("deck_url_cancelled",))
     
     def draw_debug_info(self, frame_times=None, fps=None):
         """Draw debug info including timings and FPS."""
@@ -584,7 +868,7 @@ class GUI_Manager:
                     if is_site:
                         scaled_w, scaled_h = scaled_h, scaled_w
 
-                    rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
+                    rect = pygame.Rect(screen_x, screen_y, scaled_w, scaled_h)
                     if rect.collidepoint(mx, my):
                         clicked_card = True
                         
@@ -657,7 +941,7 @@ class GUI_Manager:
                         if is_site:
                             scaled_w, scaled_h = scaled_h, scaled_w
 
-                        rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
+                        rect = pygame.Rect(screen_x, screen_y, scaled_w, scaled_h)
                         if box.colliderect(rect):
                             # Create selection tuple - use actual data source positions
                             if group == "base":
@@ -798,9 +1082,9 @@ class GUI_Manager:
         elif button_key == "load_layout":
             self.load_layout("layout.json")
         elif button_key == "load_deck":
-            self.deck_manager.load_deck()
+            self.start_background_operation("load_deck", "Loading deck...")
         elif button_key == "login":
-            self.collection_manager.load_from_curiosa()
+            self.start_background_operation("login", "Logging into Curiosa...")
         elif button_key == "load_csv":
             self.collection_manager.load_from_csv()
 
@@ -1563,6 +1847,11 @@ class GUI_Manager:
     def draw_card_preview(self):
         """Draw a large preview of the card being hovered over in the top right corner"""
         mouse_pos = pygame.mouse.get_pos()
+        
+        # Don't show preview if mouse is over sidebar
+        if self.sidebar.is_mouse_over_sidebar(mouse_pos):
+            return
+            
         hovered_card = None
         
         # Find which card the mouse is hovering over (check deck cards first, then base cards)
@@ -1591,7 +1880,7 @@ class GUI_Manager:
                         if is_site:
                             scaled_w, scaled_h = scaled_h, scaled_w
 
-                        rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
+                        rect = pygame.Rect(screen_x, screen_y, scaled_w, scaled_h)
                         if rect.collidepoint(mouse_pos):
                             hovered_card = card
                             break
@@ -1619,7 +1908,7 @@ class GUI_Manager:
                 if is_site:
                     scaled_w, scaled_h = scaled_h, scaled_w
 
-                rect = pygame.Rect(screen_x - scaled_w // 2, screen_y - scaled_h // 2, scaled_w, scaled_h)
+                rect = pygame.Rect(screen_x, screen_y, scaled_w, scaled_h)
                 if rect.collidepoint(mouse_pos):
                     hovered_card = card
                     break
@@ -1663,7 +1952,7 @@ class GUI_Manager:
             time_delta = self.clock.tick(60) / 1000.0
             mouse_pos = pygame.mouse.get_pos()
             self.update_culling()
-            self.sidebar.update(mouse_pos)
+            self.sidebar.update(mouse_pos, time_delta)
             
             for event in pygame.event.get():
                 running = self.handle_event(event)
@@ -1699,6 +1988,16 @@ class GUI_Manager:
             if self.card_manager.loading:
                 self.draw_loading_ui()
             frame_times['LoadingUI'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Check Background Operations ---
+            t0 = time.perf_counter()
+            self.check_background_operation_queue()
+            frame_times['BackgroundOps'] = (time.perf_counter() - t0) * 1000
+
+            # --- Timing: Draw Background Operation UI ---
+            t0 = time.perf_counter()
+            self.draw_background_operation_ui()
+            frame_times['BackgroundUI'] = (time.perf_counter() - t0) * 1000
 
             # --- Timing: Draw Debug Info ---
             t0 = time.perf_counter()

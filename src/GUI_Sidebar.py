@@ -11,6 +11,8 @@ class Sidebar:
         self.expanded_width = expanded_width
         self.height = height
         self.expanded = False
+        self.expand_timer = 0  # Timer to delay collapse
+        self.collapse_delay = 0.1  # 100ms delay before collapsing
 
         self.panel = pygame_gui.elements.UIPanel(
             relative_rect=pygame.Rect((0, 0), (self.width, self.height)),
@@ -158,10 +160,46 @@ class Sidebar:
             btn_data["base_rect"] = pygame.Rect(0, new_y, self.width, button_height)
             btn_data["expanded_rect"] = pygame.Rect(0, new_y, self.expanded_width, button_height)
 
-    def update(self, mouse_pos):
-        mouse_over_sidebar = mouse_pos[0] < self.expanded_width
+    def is_mouse_over_sidebar(self, mouse_pos):
+        """Check if mouse is over the sidebar area (including expanded area)"""
+        x, y = mouse_pos
+        return x < (self.expanded_width if self.expanded else self.width)
 
-        if mouse_over_sidebar:
+    def is_mouse_over_button_area(self, mouse_pos):
+        """Check if mouse is over the button icon area (left side of expanded buttons)"""
+        x, y = mouse_pos
+        
+        # If not expanded, check if over collapsed button area
+        if not self.expanded:
+            return x < self.width
+        
+        # If expanded, check if over the icon area (left side of buttons)
+        # Icon area is roughly 50 pixels wide (icon + padding)
+        icon_area_width = 50
+        
+        # Check all buttons
+        for btn_data in self.buttons.values():
+            button = btn_data["button"]
+            if (button.rect.left <= x <= button.rect.left + icon_area_width and
+                button.rect.top <= y <= button.rect.bottom):
+                return True
+        
+        # Check deck buttons
+        for btn_data in self.deck_buttons.values():
+            button = btn_data["button"]
+            if (button.rect.left <= x <= button.rect.left + icon_area_width and
+                button.rect.top <= y <= button.rect.bottom):
+                return True
+        
+        return False
+
+    def update(self, mouse_pos, time_delta=0.0):
+        """Update sidebar state based on mouse position"""
+        mouse_over_sidebar = self.is_mouse_over_sidebar(mouse_pos)
+        mouse_over_button_area = self.is_mouse_over_button_area(mouse_pos)
+        
+        # If mouse is over button area, expand immediately
+        if mouse_over_button_area:
             if not self.expanded:
                 self.expanded = True
                 self.panel.set_dimensions((self.expanded_width, self.height))
@@ -175,8 +213,16 @@ class Sidebar:
                     button = btn_data["button"]
                     button.set_dimensions(btn_data["expanded_rect"].size)
                     button.set_text(btn_data["text"])
-        else:
-            if self.expanded:
+            self.expand_timer = 0  # Reset timer
+        
+        # If mouse is over sidebar but not button area, stay expanded
+        elif mouse_over_sidebar and self.expanded:
+            self.expand_timer = 0  # Reset timer
+        
+        # If mouse is not over sidebar, start collapse timer
+        elif not mouse_over_sidebar and self.expanded:
+            self.expand_timer += time_delta
+            if self.expand_timer >= self.collapse_delay:
                 self.expanded = False
                 self.panel.set_dimensions((self.width, self.height))
                 # Collapse all buttons
@@ -189,6 +235,7 @@ class Sidebar:
                     button = btn_data["button"]
                     button.set_dimensions(btn_data["base_rect"].size)
                     button.set_text("")
+                self.expand_timer = 0
     
     def draw_button_images(self, surface):
         """Draw button images on the buttons (both collapsed and expanded states)"""

@@ -255,19 +255,30 @@ class Deck_Manager:
                 entries = card_data["entries"]
                 card_info = card_data["card_info"]
                 
-                # Determine card width in grid units
+                # Determine card dimensions and spacing based on type
                 card_type = card_info.get("type", "unknown").lower()
                 if card_type == "site":
-                    card_width_units = 3  # Site cards are 3 grid units wide
+                    # Site cards are rotated 90 degrees, so they're 140x100 instead of 100x140
+                    # Since they're rotated, they need more horizontal space (140 units) but less vertical space (100 units)
+                    # In grid units: 140/55 ≈ 2.55, so we need 3 grid units for width
+                    # For height: 100/55 ≈ 1.82, so we need 2 grid units for height
+                    card_width_units = 3  # Site cards are 3 grid units wide (165 pixels)
+                    # Use 2 grid units for row spacing for site cards
+                    card_row_spacing = LM.GRID_SPACING * 2  # 110 pixels (2 units)
                 else:
-                    card_width_units = 2  # Portrait cards are 2 grid units wide
+                    # Portrait cards are 100x140
+                    # In grid units: 100/55 ≈ 1.82, so we need 2 grid units for width
+                    # For height: 140/55 ≈ 2.55, so we need 3 grid units for height
+                    card_width_units = 2  # Portrait cards are 2 grid units wide (110 pixels)
+                    # Use 3 grid units for row spacing for normal cards
+                    card_row_spacing = LM.GRID_SPACING * 3  # 165 pixels (3 units)
                 
                 for entry in entries:
                     # Check if card fits in current row
                     if current_row_width + card_width_units > max_cards_per_row:
                         # Move to next row with proper spacing
-                        current_x = start_x
-                        current_y += row_spacing  # Use proper row spacing
+                        current_x = start_x + LM.REGION_PADDING * LM.GRID_SPACING
+                        current_y += card_row_spacing  # Use appropriate spacing for card type
                         current_row_width = 0
                         cards_in_current_row = 0
                     
@@ -279,6 +290,14 @@ class Deck_Manager:
                     # Place the card
                     deck.update_position(board_name, card_name, (current_x, current_y), 
                                        deck.get_pos_index(board_name, card_name, entry["position"]))
+                    
+                    # Debug output for card placement
+                    if card_type == "site":
+                        print(f"Placed site card '{card_name}' at ({current_x}, {current_y}) "
+                              f"with width_units={card_width_units}, row_spacing={card_row_spacing}")
+                    else:
+                        print(f"Placed normal card '{card_name}' at ({current_x}, {current_y}) "
+                              f"with width_units={card_width_units}, row_spacing={card_row_spacing}")
                     
                     # Update position for next card
                     current_x += grid_unit * card_width_units

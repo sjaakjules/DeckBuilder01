@@ -198,9 +198,14 @@ class Card_Manager:
             type_key = "Spell" if (card.type or "Unknown") in ["Aura", "Magic"] else (card.type or "Unknown")
             rarity_key = card.rareity or "Ordinary"
             grouped[element_key][type_key][rarity_key].append(card)
+        
         # Layout with tighter spacing
-        card_width = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # Normal card width + 10 padding
-        card_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # Normal card height + 10 padding
+        # Define spacing for different card types
+        portrait_card_width = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # 110 pixels
+        portrait_card_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # 165 pixels
+        site_card_width = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # 165 pixels (rotated)
+        site_card_height = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # 110 pixels (rotated)
+        
         spacing_element = LM.BOARD_PADDING * LM.GRID_SPACING  # Spacing between element groups
         spacing_type = LM.SMALL_PADDING * LM.GRID_SPACING  # Spacing between type groups
         spacing_rarity = 0  # Spacing between rarity rows
@@ -224,10 +229,19 @@ class Card_Manager:
             element_max_width = 0
             
             for type_key, rarities in types.items():
+                # Check if this type contains any site cards
+                has_sites = any(getattr(card, "type", "").lower() == "site" 
+                              for items in rarities.values() for card in items)
+                
                 # Calculate width for this type based on sqrt of total items
                 type_total = sum(len(items) for items in rarities.values())
                 cols = max(1, int(math.sqrt(type_total)))
-                col_width = cols * card_width  # Use normal card width for column calculation
+                
+                # Use appropriate card width for column calculation
+                if has_sites:
+                    col_width = cols * site_card_width  # Use site card width if any sites present
+                else:
+                    col_width = cols * portrait_card_width  # Use portrait card width
                 
                 type_start_x = x_offset + local_x
                 rarity_y_offset = 0
@@ -244,10 +258,14 @@ class Card_Manager:
                         # Determine card spacing based on whether it's a site
                         is_site = getattr(card, "type", "").lower() == "site"
                         if is_site:
-                            # Site rotated so we need to swap width and height
-                            tmp = card_height
-                            card_height = card_width
-                            card_width = tmp
+                            # Use site card dimensions
+                            card_width = site_card_width
+                            card_height = site_card_height
+                        else:
+                            # Use portrait card dimensions
+                            card_width = portrait_card_width
+                            card_height = portrait_card_height
+                        
                         x = type_start_x + col * card_width + top_left[0]
                         y = rarity_y_offset + row * card_height + top_left[1]
                         
@@ -256,7 +274,11 @@ class Card_Manager:
                     # Move down by the max height of this rarity band
                     max_rows = max_rows_per_rarity[rarity_key]
                     if max_rows > 0:
-                        row_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO
+                        # Use appropriate row height based on card types in this rarity
+                        if has_sites:
+                            row_height = site_card_height
+                        else:
+                            row_height = portrait_card_height
                         rarity_y_offset += max_rows * row_height + spacing_rarity
                 
                 local_x += col_width + spacing_type
@@ -273,15 +295,24 @@ class Card_Manager:
             type_key = "Spell" if (card.type or "Unknown") in ["Aura", "Magic"] else (card.type or "Unknown")
             rarity_key = card.rareity or "Ordinary"
             grouped[type_key][rarity_key].append(card)
+        
         # Layout with tighter spacing
-        card_width = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # Normal card width + 10 padding
-        card_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # Normal card height + 10 padding
+        # Define spacing for different card types
+        portrait_card_width = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # 110 pixels
+        portrait_card_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # 165 pixels
+        site_card_width = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO  # 165 pixels (rotated)
+        site_card_height = LM.GRID_SPACING * LM.SHORT_EDGE_SNAP_RATIO  # 110 pixels (rotated)
+        
         spacing_type = LM.GRID_SPACING * LM.SMALL_PADDING  # Spacing between type groups
         spacing_rarity = 0  # Spacing between rarity rows
         x_offset = 0
         rarity_order_list = ["Ordinary", "Exceptional", "Elite", "Unique"]
         
         for type_key, rarities in grouped.items():
+            # Check if this type contains any site cards
+            has_sites = any(getattr(card, "type", "").lower() == "site" 
+                          for items in rarities.values() for card in items)
+            
             # Precompute max rows per rarity across all rarities in this type
             max_rows_per_rarity = {}
             for rarity_key in rarity_order_list:
@@ -294,7 +325,12 @@ class Card_Manager:
             # Calculate width for this type based on sqrt of total items
             type_total = sum(len(items) for items in rarities.values())
             cols = max(1, int(math.sqrt(type_total)))
-            col_width = cols * card_width  # Use normal card width for column calculation
+            
+            # Use appropriate card width for column calculation
+            if has_sites:
+                col_width = cols * site_card_width  # Use site card width if any sites present
+            else:
+                col_width = cols * portrait_card_width  # Use portrait card width
             
             type_start_x = x_offset
             rarity_y_offset = 0
@@ -311,10 +347,14 @@ class Card_Manager:
                     # Determine card spacing based on whether it's a site
                     is_site = getattr(card, "type", "").lower() == "site"
                     if is_site:
-                        # Site rotated so we need to swap width and height
-                        tmp = card_height
-                        card_height = card_width
-                        card_width = tmp
+                        # Use site card dimensions
+                        card_width = site_card_width
+                        card_height = site_card_height
+                    else:
+                        # Use portrait card dimensions
+                        card_width = portrait_card_width
+                        card_height = portrait_card_height
+                    
                     x = type_start_x + col * card_width + top_left[0]
                     y = rarity_y_offset + row * card_height + top_left[1]
                     
@@ -323,7 +363,11 @@ class Card_Manager:
                 # Move down by the max height of this rarity band
                 max_rows = max_rows_per_rarity[rarity_key]
                 if max_rows > 0:
-                    row_height = LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO
+                    # Use appropriate row height based on card types in this rarity
+                    if has_sites:
+                        row_height = site_card_height
+                    else:
+                        row_height = portrait_card_height
                     rarity_y_offset += max_rows * row_height + spacing_rarity
             
             x_offset += col_width + spacing_type
