@@ -1,13 +1,13 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Tuple
 from Card import Card
-from Util_IO import open_threadsafe_dialog, ask_string
+from Util_IO import open_threadsafe_dialog, ask_string, ask_choice
 from Curiosa_API import CuriosaAPI
 import os
 from Util_IO import _save_json, DECK_PATH
 from Deck import Deck
-from typing import Tuple
 from Card_Manager import Card_Manager
 import Layout_Manager as LM
+import json
 
 
 class Deck_Manager:
@@ -47,6 +47,175 @@ class Deck_Manager:
     def set_gui_manager(self, gui_manager):
         """Set reference to GUI manager for notifications"""
         self.gui_manager = gui_manager
+
+    def find_deck_versions(self, deck_id: str) -> List[Tuple[str, str]]:
+        """Find all versions of a deck (original and updated versions)"""
+        if not os.path.exists(DECK_PATH):
+            return []
+        
+        versions = []
+        base_name = None
+        
+        # First, find the base deck name by looking for the original deck
+        for filename in os.listdir(DECK_PATH):
+            if filename.endswith('.json'):
+                filepath = os.path.join(DECK_PATH, filename)
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        deck_data = json.load(f)
+                    if deck_data.get("id") == deck_id:
+                        if not filename.endswith('_updated.json') and '_updated' not in filename:
+                            # This is the original deck
+                            base_name = filename.replace('.json', '')
+                            break
+                except Exception:
+                    continue
+        
+        if not base_name:
+            return []
+        
+        # Now find all versions of this deck
+        for filename in os.listdir(DECK_PATH):
+            if filename.startswith(base_name) and filename.endswith('.json'):
+                filepath = os.path.join(DECK_PATH, filename)
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        deck_data = json.load(f)
+                    if deck_data.get("id") == deck_id:
+                        version_name = filename.replace('.json', '')
+                        if version_name == base_name:
+                            version_display = "Original"
+                        else:
+                            version_display = version_name.replace(base_name + '_', '')
+                        versions.append((version_name, version_display))
+                except Exception:
+                    continue
+        
+        # Sort versions: original first, then updated versions
+        versions.sort(key=lambda x: (x[1] != "Original", x[1]))
+        return versions
+
+    def load_deck_version(self, deck_id: str, version_name: str) -> Deck:
+        """Load a specific version of a deck"""
+        filepath = os.path.join(DECK_PATH, f"{version_name}.json")
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"Deck file not found: {filepath}")
+        
+        with open(filepath, "r", encoding="utf-8") as f:
+            deck_data = json.load(f)
+        
+        deck_name = deck_data.get("name", "Unknown")
+        deck_author = deck_data.get("author", "Unknown")
+        
+        return Deck.from_json(name=deck_name, author=deck_author, id=deck_id, json_data=deck_data)
+
+    def save_deck_with_version_management(self, deck: Deck, force_overwrite: bool = False) -> Optional[str]:
+        """Save a deck with version management - returns the filename used"""
+        if not os.path.exists(DECK_PATH):
+            os.makedirs(DECK_PATH, exist_ok=True)
+        
+        # Find existing versions
+        versions = self.find_deck_versions(deck.id)
+        
+        # Determine the base name
+        base_name = None
+        if versions:
+            base_name = versions[0][0]  # First version's name
+            if base_name.endswith('_updated'):
+                # Extract the original base name
+                base_name = base_name.replace('_updated', '')
+        else:
+            # No existing versions, create base name from deck name
+            base_name = "".join(c for c in deck.name if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            base_name = base_name.replace(' ', '_')
+        
+        # Check if we have an updated version that could be overwritten
+        has_updated_version = any('updated' in version[1].lower() for version in versions)
+        
+        if has_updated_version and not force_overwrite:
+            # Ask user what to do
+            options = ["Overwrite Latest Updated Version", "Save as New Version", "Cancel"]
+            choice = open_threadsafe_dialog(
+                ask_choice,
+                title="Save Deck",
+                prompt=f"An updated version of '{deck.name}' already exists. What would you like to do?",
+                options=options
+            )
+            
+            if choice == "Cancel":
+                return None
+            elif choice == "Overwrite Latest Updated Version":
+                # Find the latest updated version
+                latest_updated = None
+                for version_name, version_display in versions:
+                    if 'updated' in version_display.lower():
+                        latest_updated = version_name
+                
+                if latest_updated:
+                    filename = f"{latest_updated}.json"
+                else:
+                    filename = f"{base_name}_updated.json"
+            else:  # Save as New Version
+                # Find the next version number
+                version_num = 1
+                while any(f"{base_name}_updated{version_num}" in version[0] for version in versions):
+                    version_num += 1
+                filename = f"{base_name}_updated{version_num}.json"
+        else:
+            # No existing updated version or force overwrite
+            if has_updated_version:
+                # Overwrite the latest updated version
+                latest_updated = None
+                for version_name, version_display in versions:
+                    if 'updated' in version_display.lower():
+                        latest_updated = version_name
+                
+                if latest_updated:
+                    filename = f"{latest_updated}.json"
+                else:
+                    filename = f"{base_name}_updated.json"
+            else:
+                # Create first updated version
+                filename = f"{base_name}_updated.json"
+        
+        # Convert deck to JSON format
+        deck_data = {
+            "name": deck.name,
+            "author": deck.author,
+            "id": deck.id,
+            "mainboard": [],
+            "sideboard": [],
+            "maybeboard": [],
+            "avatar": []
+        }
+        
+        # Convert deck structure to JSON format
+        for board_name in ["mainboard", "sideboard", "maybeboard", "avatar"]:
+            if board_name in deck.deck:
+                for card_name, entries in deck.deck[board_name].items():
+                    for entry in entries:
+                        card_entry = {
+                            "card": {"name": card_name},
+                            "quantity": 1,
+                            "variant": {
+                                "setCard": {
+                                    "set": {"name": entry.get("set_name", "Unknown")},
+                                    "meta": {"category": entry.get("kind", "Unknown")}
+                                },
+                                "finish": entry.get("finish", "Unknown"),
+                                "product": entry.get("product", "Unknown")
+                            },
+                            "position": entry["position"]
+                        }
+                        deck_data[board_name].append(card_entry)
+        
+        # Save to file
+        filepath = os.path.join(DECK_PATH, filename)
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(deck_data, f, indent=2)
+        
+        print(f"✅ Saved deck: {filename}")
+        return filename
             
     def load_deck(self):
         deck_url = open_threadsafe_dialog(
@@ -74,14 +243,14 @@ class Deck_Manager:
                 safe_filename = safe_filename.replace(' ', '_')
                 _save_json(deck_data, f"{DECK_PATH}/{safe_filename}.json")
                 
-                # Load deck into the viewer
-                deck = Deck.from_json(name=deck_name, author=deck_author, id=deck_id, json_data=deck_data)
+                # Load deck into the viewer using Curiosa format
+                deck = Deck.from_curiosa_json(name=deck_name, author=deck_author, id=deck_id, json_data=deck_data)
                 self.decks.append(deck)
                 print(f"  ✅ Added deck: {deck_name} to deck list")
                 
-                # Notify GUI to add deck button
-                if self.gui_manager and hasattr(self.gui_manager, 'sidebar'):
-                    self.gui_manager.sidebar.add_deck_button(deck_name, deck_id)
+                # Notify GUI to add deck button through background operation queue
+                if self.gui_manager and hasattr(self.gui_manager, 'background_operation_queue'):
+                    self.gui_manager.background_operation_queue.put(("add_deck_button", deck_name, deck_id))
             else:
                 print(f"  ❌ Failed to download deck {deck_url}")
                 
@@ -290,7 +459,7 @@ class Deck_Manager:
                     # Place the card
                     deck.update_position(board_name, card_name, (current_x, current_y), 
                                        deck.get_pos_index(board_name, card_name, entry["position"]))
-                    
+                    '''
                     # Debug output for card placement
                     if card_type == "site":
                         print(f"Placed site card '{card_name}' at ({current_x}, {current_y}) "
@@ -298,7 +467,7 @@ class Deck_Manager:
                     else:
                         print(f"Placed normal card '{card_name}' at ({current_x}, {current_y}) "
                               f"with width_units={card_width_units}, row_spacing={card_row_spacing}")
-                    
+                    '''
                     # Update position for next card
                     current_x += grid_unit * card_width_units
                     current_row_width += card_width_units

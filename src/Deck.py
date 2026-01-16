@@ -21,6 +21,14 @@ class Deck:
             deck._load_board_data(board, json_data)
         return deck
 
+    @classmethod
+    def from_curiosa_json(cls, name: str, author: str, id: str, json_data: Dict[str, Any]) -> "Deck":
+        """Create a deck from Curiosa API format"""
+        deck = cls(name, author, id)
+        for board in ["mainboard", "sideboard", "maybeboard", "avatar"]:
+            deck._load_curiosa_board_data(board, json_data)
+        return deck
+
     def _load_board_data(self, board: str, json_data: Dict[str, Any]):
         if board not in json_data:
             print(f"Board {board} not found in json data")
@@ -50,6 +58,51 @@ class Deck:
                                   finish=finish, product=product, category=category)
             except Exception as e:
                 print(f"Error processing card in {board}: {e}")
+                continue
+
+    def _load_curiosa_board_data(self, board: str, json_data: Dict[str, Any]):
+        """Load board data from Curiosa API format"""
+        if board not in json_data:
+            print(f"Board {board} not found in json data")
+            return
+
+        board_data = json_data[board]
+        if not isinstance(board_data, list):
+            print(f"Board {board} data is not a list")
+            board_data = [board_data]
+
+        for card_entry in board_data:
+            if not isinstance(card_entry, dict):
+                print(f"Invalid card entry in {board}: {card_entry}")
+                continue
+                
+            try:
+                # Extract card information from Curiosa format
+                card_info = card_entry.get("card", {})
+                card_name = card_info.get("name", "Unknown")
+                quantity = card_entry.get("quantity", 1)
+                
+                # Extract variant information
+                variants = card_info.get("variants", [])
+                if variants:
+                    # Use the first variant for set information
+                    variant = variants[0]
+                    set_info = variant.get("setCard", {})
+                    set_name = set_info.get("set", {}).get("name", "Unknown")
+                    finish = variant.get("finish", "Unknown")
+                    product = variant.get("product", "Unknown")
+                    category = set_info.get("meta", {}).get("category", "Unknown")
+                else:
+                    set_name = "Unknown"
+                    finish = "Unknown"
+                    product = "Unknown"
+                    category = "Unknown"
+
+                for _ in range(quantity):
+                    self.add_card(board, card_name, position=(0, 0), set_name=set_name,
+                                  finish=finish, product=product, category=category)
+            except Exception as e:
+                print(f"Error processing Curiosa card in {board}: {e}")
                 continue
         
     def add_card(self, board: str, name: str, position: Tuple[int, int],

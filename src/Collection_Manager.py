@@ -55,10 +55,10 @@ class Collection_Manager:
             # Fetch and download all decks from user's folders
             self.deck_manager.download_user_decks(self.curiosa)
             
-            # Notify GUI about loaded decks
-            if self.gui_manager and hasattr(self.gui_manager, 'sidebar'):
+            # Notify GUI about loaded decks through background operation queue
+            if self.gui_manager and hasattr(self.gui_manager, 'background_operation_queue'):
                 for deck in self.deck_manager.decks:
-                    self.gui_manager.sidebar.add_deck_button(deck.name, deck.id)
+                    self.gui_manager.background_operation_queue.put(("add_deck_button", deck.name, deck.id))
 
         except Exception as e:
             print(f"❌ Login to Curiosa failed: {e}")

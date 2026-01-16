@@ -105,6 +105,7 @@ class CuriosaAPI:
                 return {
                     "name": deck_info[0].strip() or "Unknown",
                     "author": deck_info[1].strip() or "Unknown",
+                    "id": deck_id,
                     "mainboard": results[0]["result"]["data"]["json"],
                     "avatar": results[1]["result"]["data"]["json"],
                     "sideboard": results[2]["result"]["data"]["json"],

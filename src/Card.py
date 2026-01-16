@@ -15,9 +15,8 @@ Responsibilities:
 	•	Card objects are passed into Rule_Engine for parsing Rule Text into actual abilities.
 '''
 import re
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Tuple, Optional
 import pygame
-from Util_IO import _save_json
 from PIL import Image
 
 class Card:   
@@ -264,6 +263,125 @@ class Card:
             raw = resized.tobytes("raw", "RGBA")
             surf = pygame.image.frombytes(raw, (w, h), "RGBA").convert_alpha()
             self.image_thumbs.append(surf)
+
+    def create_text_card_surface(self, width: int = 100, height: int = 140, target_width: int = None, target_height: int = None) -> pygame.Surface:
+        """
+        Create a text-based card surface when no image is available.
+        Layout:
+        - Name: center justified at top
+        - Cost: top left
+        - Attack/Defense: top right (defense below attack if different)
+        - Thresholds: left justified under cost, each element on new line
+        - Type: center justified at bottom
+        - Rules text: under type with line separator
+        """
+        # Use target dimensions if provided, otherwise use base dimensions
+        if target_width is not None and target_height is not None:
+            # Render at target resolution for maximum crispness at all zoom levels
+            render_width = target_width
+            render_height = target_height
+            # Calculate scale factor based on target size vs base size
+            scale_factor = max(target_width / width, target_height / height)
+        else:
+            # Fallback to high-resolution rendering for base size
+            scale_factor = 4
+            render_width = width * scale_factor
+            render_height = height * scale_factor
+        
+        # Create high-resolution surface
+        render_surface = pygame.Surface((render_width, render_height))
+        render_surface.fill((255, 255, 255))  # White background
+        
+        # Spacing variables
+        bottom_height = 60
+        
+        # Set up fonts at appropriate resolution for crispness
+        try:
+            # Use fonts sized for the render resolution
+            title_font = pygame.font.Font(None, int(10 * scale_factor))
+            small_font = pygame.font.Font(None, int(10 * scale_factor))
+            tiny_font = pygame.font.Font(None, int(8 * scale_factor))
+        except Exception:
+            # Fallback to default font
+            title_font = pygame.font.SysFont('Arial', int(10 * scale_factor), bold=True)
+            small_font = pygame.font.SysFont('Arial', int(10 * scale_factor))
+            tiny_font = pygame.font.SysFont('Arial', int(8 * scale_factor))
+        
+        # Colors
+        black = (0, 0, 0)
+        gray = (128, 128, 128)
+        
+        # Name - center justified at top (smaller and moved up)
+        name_text = title_font.render(self.name, True, black)
+        name_rect = name_text.get_rect(center=(render_width // 2, int(10 * scale_factor)))
+        render_surface.blit(name_text, name_rect)
+        
+        # Cost - top left (just number)
+        if self.cost is not None:
+            cost_text = small_font.render(str(self.cost), True, black)
+            render_surface.blit(cost_text, (int(5 * scale_factor), int(5 * scale_factor)))
+        
+        # Attack/Defense - top right (just numbers)
+        if self.attack is not None:
+            attack_text = small_font.render(str(self.attack), True, black)
+            attack_rect = attack_text.get_rect(topright=(render_width - int(5 * scale_factor), int(5 * scale_factor)))
+            render_surface.blit(attack_text, attack_rect)
+            
+            if self.defence is not None and self.defence != self.attack:
+                defense_text = small_font.render(str(self.defence), True, black)
+                defense_rect = defense_text.get_rect(topright=(render_width - int(5 * scale_factor), int(18 * scale_factor)))
+                render_surface.blit(defense_text, defense_rect)
+        
+        # Thresholds - left justified under cost (tighter spacing)
+        y_offset = int(20 * scale_factor)
+        if self.thresholds:
+            for element, value in self.thresholds.items():
+                if value and value > 0:
+                    threshold_text = tiny_font.render(f"{element.capitalize()}: {value}", True, gray)
+                    render_surface.blit(threshold_text, (int(5 * scale_factor), y_offset))
+                    y_offset += int(9 * scale_factor)
+        
+        # Type - center justified at bottom (moved up significantly more)
+        if self.type:
+            type_text = small_font.render(self.type, True, black)
+            type_rect = type_text.get_rect(center=(render_width // 2, render_height - int(bottom_height * scale_factor)))
+            render_surface.blit(type_text, type_rect)
+            
+            # Draw line separator
+            pygame.draw.line(render_surface, gray, (int(10 * scale_factor), render_height - int((bottom_height - 10) * scale_factor)), 
+                           (render_width - int(10 * scale_factor), render_height - int((bottom_height - 10) * scale_factor)), int(1 * scale_factor))
+        
+        # Rules text - under type (tighter spacing, even more lines)
+        if self.rules_text:
+            # Split rules text into lines that fit
+            words = self.rules_text.split()
+            lines = []
+            current_line = ""
+            
+            for word in words:
+                test_line = current_line + (" " if current_line else "") + word
+                test_surface = tiny_font.render(test_line, True, black)
+                if test_surface.get_width() <= render_width - int(10 * scale_factor):
+                    current_line = test_line
+                else:
+                    if current_line:
+                        lines.append(current_line)
+                    current_line = word
+            
+            if current_line:
+                lines.append(current_line)
+            
+            # Render lines with tighter spacing, even more lines
+            y_pos = render_height - int((bottom_height - 20) * scale_factor)
+            for line in lines[:13]:  # Increased from 12 to 13 lines for even more text
+                line_text = tiny_font.render(line, True, black)
+                line_rect = line_text.get_rect(center=(render_width // 2, y_pos))
+                render_surface.blit(line_text, line_rect)
+                y_pos += int(8 * scale_factor)  # Tighter spacing
+        
+        # Return the surface at the target resolution (no scaling needed)
+        # Note: Rotation is handled by the GUI_Manager to match image card behavior
+        return render_surface
 
     @staticmethod
     def print_group(grouped):

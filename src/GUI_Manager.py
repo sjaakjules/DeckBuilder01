@@ -10,7 +10,7 @@ from Collection_Manager import Collection_Manager
 import Layout_Manager as LM
 from GUI_Sidebar import Sidebar
 from GUI_Themes import Modern_theme
-from Util_IO import _save_json
+from Util_IO import _save_json, open_threadsafe_dialog, ask_choice
 from Deck import Deck
 from Card import Card
 import time
@@ -353,7 +353,9 @@ class GUI_Manager:
             idx = visible_card["idx"]
             deck_id = visible_card["deck_id"]
             
-            if card.image_thumbs is None or len(card.image_thumbs) != len(card.thumb_levels):
+            # Skip only if image_thumbs is None (not initialized) or if it has some but not all thumbnails
+            # Allow cards with empty image_thumbs (image loading failed) to use text fallback
+            if card.image_thumbs is None or (len(card.image_thumbs) > 0 and len(card.image_thumbs) != len(card.thumb_levels)):
                 continue
 
             rect = self.draw_card_image(card, position)
@@ -411,9 +413,10 @@ class GUI_Manager:
             world_y < self.cull_rect[2] or world_y > self.cull_rect[3]):
             return
 
-        # Check if card has valid image data
+        # Check if card has valid image data, use text fallback if not
         if card.image_thumbs is None or len(card.image_thumbs) == 0:
-            return None
+            # Use text-based card display as fallback
+            return self.draw_text_card(card, position)
 
         screen_x = world_x * self.zoom + self.offset_x
         screen_y = world_y * self.zoom + self.offset_y
@@ -433,6 +436,37 @@ class GUI_Manager:
         
         if is_site:
             card_surface = pygame.transform.rotate(card_surface, -90)
+        
+        rect = card_surface.get_rect(topleft=(screen_x, screen_y))
+        self.window.blit(card_surface, rect.topleft)
+        
+        return rect
+    
+    def draw_text_card(self, card: Card, position: Tuple[float, float] | None = None):
+        """Draw a text-based card when no image is available"""
+        # Early culling: check if card is completely outside viewport
+        if position is None:
+            world_x, world_y = card.position
+        else:
+            world_x, world_y = position
+        if (world_x < self.cull_rect[0] or world_x > self.cull_rect[1] or 
+            world_y < self.cull_rect[2] or world_y > self.cull_rect[3]):
+            return
+
+        screen_x = world_x * self.zoom + self.offset_x
+        screen_y = world_y * self.zoom + self.offset_y
+        is_site = getattr(card, "type", "").lower() == "site"
+        
+        # Calculate target dimensions
+        target_width = int(LM.CARD_DIMENSIONS[0] * self.zoom)
+        target_height = int(LM.CARD_DIMENSIONS[1] * self.zoom)
+        
+        # Create text card surface at target resolution for maximum crispness
+        
+        if is_site:
+            card_surface = card.create_text_card_surface(LM.CARD_DIMENSIONS[1], LM.CARD_DIMENSIONS[0], target_height, target_width)
+        else:
+            card_surface = card.create_text_card_surface(LM.CARD_DIMENSIONS[0], LM.CARD_DIMENSIONS[1], target_width, target_height)
         
         rect = card_surface.get_rect(topleft=(screen_x, screen_y))
         self.window.blit(card_surface, rect.topleft)
@@ -667,8 +701,8 @@ class GUI_Manager:
             safe_filename = safe_filename.replace(' ', '_')
             _save_json(deck_data, f"{DECK_PATH}/{safe_filename}.json")
             
-            # Load deck into viewer
-            deck = Deck.from_json(name=deck_name, author=deck_author, id=deck_id, json_data=deck_data)
+            # Load deck into viewer using Curiosa format
+            deck = Deck.from_curiosa_json(name=deck_name, author=deck_author, id=deck_id, json_data=deck_data)
             self.deck_manager.decks.append(deck)
             
             # Add deck button to sidebar
@@ -1089,31 +1123,99 @@ class GUI_Manager:
             self.collection_manager.load_from_csv()
 
     def handle_deck_button_click(self, deck_id):
-        """Handle clicks on deck buttons - place deck on grid (single deck only)"""
-        # Find the deck by ID
-        deck = None
-        for d in self.deck_manager.decks:
-            if d.id == deck_id:
-                deck = d
-                break
+        """Handle clicks on deck buttons - check for multiple versions and let user choose"""
+        # Find all versions of this deck
+        versions = self.deck_manager.find_deck_versions(deck_id)
         
-        if not deck:
-            print(f"❌ Deck {deck_id} not found")
+        if not versions:
+            # No versions found - place the base deck and create a new version
+            print(f"📁 No saved versions found for deck {deck_id}, placing base deck and creating new version")
+            self._place_base_deck_and_create_version(deck_id)
             return
         
-        # Clear any existing deck before placing the new one
-        if self.placed_decks:
-            print(f"🗑️ Clearing existing deck before placing '{deck.name}'")
-            self.clear_all_placed_decks()
-        
-        # Place the deck on the grid
-        self.place_deck_on_grid(deck)
-        
-        # Mark deck as placed
-        self.placed_decks.add(deck_id)
-        
-        # Remove the button since deck is now placed
-        self.sidebar.remove_deck_button(deck_id)
+        if len(versions) == 1:
+            # Only one version, load it directly
+            version_name, version_display = versions[0]
+            self._load_and_place_deck_version(deck_id, version_name)
+        else:
+            # Multiple versions, ask user to choose
+            options = [version[1] for version in versions]  # Display names
+            choice = open_threadsafe_dialog(
+                ask_choice,
+                title="Choose Deck Version",
+                prompt="Multiple versions of this deck found. Which version would you like to load?",
+                options=options
+            )
+            
+            if choice:
+                # Find the version name for the chosen display name
+                for version_name, version_display in versions:
+                    if version_display == choice:
+                        self._load_and_place_deck_version(deck_id, version_name)
+                        break
+
+    def _load_and_place_deck_version(self, deck_id: str, version_name: str):
+        """Load a specific version of a deck and place it on the grid"""
+        try:
+            # Load the deck version
+            deck = self.deck_manager.load_deck_version(deck_id, version_name)
+            
+            # Clear any existing deck before placing the new one
+            if self.placed_decks:
+                print(f"🗑️ Clearing existing deck before placing '{deck.name}'")
+                self.clear_all_placed_decks()
+            
+            # Place the deck on the grid
+            self.place_deck_on_grid(deck)
+            
+            # Mark deck as placed
+            self.placed_decks.add(deck_id)
+            
+            # Remove the button since deck is now placed
+            self.sidebar.remove_deck_button(deck_id)
+            
+            print(f"✅ Loaded and placed deck version: {version_name}")
+            
+        except Exception as e:
+            print(f"❌ Failed to load deck version {version_name}: {e}")
+
+    def _place_base_deck_and_create_version(self, deck_id: str):
+        """Place the base deck from deck manager and create a new updated version"""
+        try:
+            # Find the base deck in the deck manager
+            base_deck = None
+            for deck in self.deck_manager.decks:
+                if deck.id == deck_id:
+                    base_deck = deck
+                    break
+            
+            if not base_deck:
+                print(f"❌ Base deck {deck_id} not found in deck manager")
+                return
+            
+            # Clear any existing deck before placing the new one
+            if self.placed_decks:
+                print(f"🗑️ Clearing existing deck before placing '{base_deck.name}'")
+                self.clear_all_placed_decks()
+            
+            # Place the base deck on the grid
+            self.place_deck_on_grid(base_deck)
+            
+            # Mark deck as placed
+            self.placed_decks.add(deck_id)
+            
+            # Remove the button since deck is now placed
+            self.sidebar.remove_deck_button(deck_id)
+            
+            # Create a new updated version immediately
+            filename = self.deck_manager.save_deck_with_version_management(base_deck, force_overwrite=False)
+            if filename:
+                print(f"✅ Placed base deck and created new version: {filename}")
+            else:
+                print("✅ Placed base deck but failed to create new version")
+            
+        except Exception as e:
+            print(f"❌ Failed to place base deck and create version: {e}")
 
     def clear_all_placed_decks(self):
         """Clear all placed decks and their card positions from the grid"""
@@ -1139,7 +1241,7 @@ class GUI_Manager:
         print("✅ Cleared all placed decks from the grid")
 
     def save_updated_decks(self):
-        """Save all placed decks to separate JSON files with '_updated' suffix"""
+        """Save all placed decks using version management"""
         if not self.placed_decks:
             print("ℹ️ No decks to save")
             return
@@ -1148,50 +1250,10 @@ class GUI_Manager:
         for deck in self.deck_manager.decks:
             if deck.id in self.placed_decks:
                 try:
-                    # Create filename with _updated suffix
-                    safe_filename = "".join(c for c in deck.name if c.isalnum() or c in (' ', '-', '_')).rstrip()
-                    safe_filename = safe_filename.replace(' ', '_')
-                    updated_filename = f"{safe_filename}_updated.json"
-                    
-                    # Convert deck to JSON format
-                    deck_data = {
-                        "name": deck.name,
-                        "author": deck.author,
-                        "id": deck.id,
-                        "mainboard": [],
-                        "sideboard": [],
-                        "maybeboard": [],
-                        "avatar": []
-                    }
-                    
-                    # Convert deck structure to JSON format
-                    for board_name in ["mainboard", "sideboard", "maybeboard", "avatar"]:
-                        if board_name in deck.deck:
-                            for card_name, entries in deck.deck[board_name].items():
-                                for entry in entries:
-                                    card_entry = {
-                                        "card": {"name": card_name},
-                                        "quantity": 1,
-                                        "variant": {
-                                            "setCard": {
-                                                "set": {"name": entry.get("set_name", "Unknown")},
-                                                "meta": {"category": entry.get("kind", "Unknown")}
-                                            },
-                                            "finish": entry.get("finish", "Unknown"),
-                                            "product": entry.get("product", "Unknown")
-                                        },
-                                        "position": entry["position"]
-                                    }
-                                    deck_data[board_name].append(card_entry)
-                    
-                    # Save to file
-                    from Util_IO import DECK_PATH
-                    deck_filepath = os.path.join(DECK_PATH, updated_filename)
-                    with open(deck_filepath, "w", encoding="utf-8") as f:
-                        json.dump(deck_data, f, indent=2)
-                    
-                    print(f"✅ Saved updated deck: {updated_filename}")
-                    saved_count += 1
+                    # Use the new version management system
+                    filename = self.deck_manager.save_deck_with_version_management(deck)
+                    if filename:
+                        saved_count += 1
                     
                 except Exception as e:
                     print(f"❌ Failed to save updated deck {deck.name}: {e}")
@@ -1865,7 +1927,9 @@ class GUI_Manager:
                         continue
                         
                     card = self.card_manager.cards[card_name]
-                    if card.image_thumbs is None or len(card.image_thumbs) == 0:
+                    # Skip only if image_thumbs is None (not initialized)
+                    # Allow cards with empty image_thumbs (image loading failed) to use text fallback
+                    if card.image_thumbs is None:
                         continue
                     
                     for entry in entries:
@@ -1894,7 +1958,9 @@ class GUI_Manager:
         # If no deck card was found, check base cards
         if not hovered_card:
             for card in self.card_manager.cards.values():
-                if card.image_thumbs is None or len(card.image_thumbs) == 0:
+                # Skip only if image_thumbs is None (not initialized)
+                # Allow cards with empty image_thumbs (image loading failed) to use text fallback
+                if card.image_thumbs is None:
                     continue
                 
                 world_x, world_y = card.position
@@ -1913,16 +1979,24 @@ class GUI_Manager:
                     hovered_card = card
                     break
         
-        if hovered_card and hovered_card.image_thumbs and len(hovered_card.image_thumbs) > 0:
+        if hovered_card:
             # Check if this is a site card (horizontal cards)
             is_site = getattr(hovered_card, "type", "").lower() == "site"
             
             preview_height = 420
             preview_width = int(preview_height * (LM.CARD_DIMENSIONS[0] / LM.CARD_DIMENSIONS[1]))
-            preview_surface = pygame.transform.smoothscale(hovered_card.image_thumbs[-1], (preview_width, preview_height))
             
-            if is_site:
-                preview_surface = pygame.transform.rotate(preview_surface, -90)
+            # Use image if available, otherwise create text card
+            if hovered_card.image_thumbs and len(hovered_card.image_thumbs) > 0:
+                preview_surface = pygame.transform.smoothscale(hovered_card.image_thumbs[-1], (preview_width, preview_height))
+                if is_site:
+                    preview_surface = pygame.transform.rotate(preview_surface, -90)
+            else:
+                # Create text card for preview at target resolution for maximum crispness
+                if is_site:
+                    preview_surface = hovered_card.create_text_card_surface(LM.CARD_DIMENSIONS[1], LM.CARD_DIMENSIONS[0], preview_height, preview_width)
+                else:
+                    preview_surface = hovered_card.create_text_card_surface(LM.CARD_DIMENSIONS[0], LM.CARD_DIMENSIONS[1], preview_width, preview_height)
             
             # Position in top right corner with some padding
             padding = 20
@@ -2058,3 +2132,23 @@ class GUI_Manager:
                     sel_entry_index == entry_index):
                     return True
         return False
+
+    def center_view_on_position(self, world_x: int, world_y: int):
+        """Center the view on a specific world position"""
+        # Calculate the offset needed to center the position on screen
+        target_screen_x = self.WIDTH // 2
+        target_screen_y = self.HEIGHT // 2
+        
+        # Convert world position to screen position
+        current_screen_x = world_x * self.zoom + self.offset_x
+        current_screen_y = world_y * self.zoom + self.offset_y
+        
+        # Calculate the difference needed
+        dx = target_screen_x - current_screen_x
+        dy = target_screen_y - current_screen_y
+        
+        # Update the offset
+        self.offset_x += dx
+        self.offset_y += dy
+        
+        print(f"🔄 Centered view on position ({world_x}, {world_y})")

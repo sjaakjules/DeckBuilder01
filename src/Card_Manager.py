@@ -65,7 +65,10 @@ class Card_Manager:
             
         # --- With cards loaded, start downloading images ---
         self.download_queue = queue.Queue()
-        for card in self.cards.values():
+        for i, card in enumerate(self.cards.values()):
+            # Set card position when adding to download queue
+            card.position = ((i % 25) * LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO,
+                           (i // 25) * LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO)
             self.download_queue.put((card))
         self.download_thread = threading.Thread(target=self.image_download_worker, daemon=True)
         self.download_thread.start()
@@ -155,11 +158,14 @@ class Card_Manager:
                 
                 img = Image.open(BytesIO(img_data)).convert("RGBA")
                 card.set_scaled_surfaces(img)
-                card.position = ((self.cards_loaded % 25) * LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO,
-                                 (self.cards_loaded // 25) * LM.GRID_SPACING * LM.LONG_EDGE_SNAP_RATIO)
-                self.cards_loaded += 1
             except Exception as e:
                 print(f"Error loading card {getattr(card, 'name', 'unknown')}: {e}")
+                # Ensure image_thumbs is set to empty list so text fallback works
+                if card.image_thumbs is None:
+                    card.image_thumbs = []
+            
+            # Always increment counter and mark as processed, regardless of image loading success
+            self.cards_loaded += 1
             self.download_queue.task_done()
 
         self.loading = False
